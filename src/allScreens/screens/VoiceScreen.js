@@ -1,3 +1,4 @@
+// EXPO_PUBLIC_OPENAI_API_KEY="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"
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from "react-native";
 import { Video, Audio } from "expo-av";
