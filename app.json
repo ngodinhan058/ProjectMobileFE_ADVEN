@@ -10,13 +10,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "newArchEnabled": true
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#000000",
-        "newArchEnabled": true
+        "backgroundColor": "#000000"
       },
       "permissions": [
         "INTERNET",
