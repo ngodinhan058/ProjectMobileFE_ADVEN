@@ -25,6 +25,7 @@ import UUID from 'react-native-uuid';
 import HomeScreen from './src/allScreens/HomeScreen';
 import LoginScreen from './src/allScreens/screens/login/LoginScreen';
 import VoiceScreen from './src/allScreens/screens/VoiceScreen';
+import LodingScreen from './src/allScreens/screens/LoadingScreen';
 
 
 
@@ -45,7 +46,7 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={VoiceScreen} />
+        <Stack.Screen name="Home" component={LodingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
