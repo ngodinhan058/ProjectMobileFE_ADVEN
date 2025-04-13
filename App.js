@@ -37,6 +37,7 @@ function getWidth() {
 
 
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState('Action');
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
   return (
     <NavigationContainer>
@@ -67,7 +68,7 @@ export default function App() {
               // centring Tab Button...
               position: 'absolute',
               top: 20
-            }}>
+            }} >
               <FontAwesome5
                 name="home"
                 size={20}
@@ -82,6 +83,7 @@ export default function App() {
               toValue: 0,
               useNativeDriver: true
             }).start();
+            setCurrentScreen("")
           }
         })}></Tab.Screen>
 
@@ -106,6 +108,7 @@ export default function App() {
               toValue: getWidth(),
               useNativeDriver: true
             }).start();
+            setCurrentScreen("")
           }
         })}></Tab.Screen>
 
@@ -128,7 +131,12 @@ export default function App() {
               ></FontAwesome5>
             </View>
           )
-        }}></Tab.Screen>
+        }}listeners={({ navigation, route }) => ({
+          // Onpress Update....
+          tabPress: e => {
+            setCurrentScreen("Action")
+          }
+        })} ></Tab.Screen>
 
         <Tab.Screen name={"Notifications"} component={NotificationScreen} options={{
           tabBarIcon: ({ focused }) => (
@@ -151,6 +159,7 @@ export default function App() {
               toValue: getWidth() * 3,
               useNativeDriver: true
             }).start();
+            setCurrentScreen("")
           }
         })}></Tab.Screen>
 
@@ -175,25 +184,26 @@ export default function App() {
               toValue: getWidth() * 4,
               useNativeDriver: true
             }).start();
+            setCurrentScreen("")
           }
         })}></Tab.Screen>
 
       </Tab.Navigator>
 
-      <Animated.View style={{
-        width: getWidth() - 20,
-        height: 2,
-        backgroundColor: '#6972F0',
-        position: 'absolute',
-        bottom: 78,
-        // Horizontal Padding = 20...
-        left: 50,
-        borderRadius: 20,
-        transform: [
-          { translateX: tabOffsetValue }
-        ]
-      }}>
-      </Animated.View>
+      {currentScreen !== 'Action' && (
+        <Animated.View
+          style={{
+            width: getWidth() - 20,
+            height: 2,
+            backgroundColor: '#6972F0',
+            position: 'absolute',
+            bottom: 78,
+            left: 50,
+            borderRadius: 20,
+            transform: [{ translateX: tabOffsetValue }]
+          }}
+        />
+      )}
     </NavigationContainer>
   );
 }
