@@ -1,14 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, } from "react-native";
 import { BallIndicator } from 'react-native-indicators';
-  import { LinearGradient } from 'expo-linear-gradient';
-  import { LogBox } from 'react-native';
-  const LoginScreen = () => {
+import { LinearGradient } from 'expo-linear-gradient';
+import { LogBox } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import { useNavigation } from '@react-navigation/native';
+const LoginScreen = () => {
+    const navigation = useNavigation();
+    const [isConnected, setIsConnected] = useState(null);
     useEffect(() => {
         LogBox.ignoreLogs([
             'A props object containing a "key" prop is being spread into JSX'
         ]);
     }, []);
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+          setIsConnected(state.isConnected);
+        });
+    
+        const checkConnection = async () => {
+          const state = await NetInfo.fetch();
+          if (state.isConnected) {
+            setTimeout(() => {
+              navigation.replace('HomeScreen');
+            }, 1500);
+          }
+        };
+    
+        checkConnection();
+    
+        return () => unsubscribe(); // cleanup
+      }, []);
     return (
         <View style={styles.container}>
             <Image
@@ -32,7 +54,7 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         fontWeight: "bold"
     }
-    
+
 
 });
 
