@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert, Button } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert, Button, ImageBackground } from "react-native";
 import { Video, Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -124,7 +124,7 @@ const LoginScreen = () => {
                     },
                 }
             );
-            console.log("thông báo từ sendAudioToWhisper",response.data.text);
+            console.log("thông báo từ sendAudioToWhisper", response.data.text);
 
             return response.data.text;
         } catch (error) {
@@ -192,7 +192,10 @@ const LoginScreen = () => {
     }, [AISpeaking]);
 
     return (
-        <View style={styles.container}>
+        <ImageBackground
+            style={styles.container}
+            source={require('../../assets/bg_voice.png')}
+            resizeMode="cover">
             {/* Video nền */}
             <Video
                 source={videoBg}  // Sử dụng video từ thư mục nội bộ
@@ -270,14 +273,14 @@ const LoginScreen = () => {
             </View>
             {/* Nội dung giao diện đăng nhập */}
             <Button title="🗣 Test Speak" onPress={() => speakText("xin chào tôi là AI speak EZ. tôi có thể giúp gì cho bạn")} />
-        </View>
+        </ImageBackground>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     video: {
         position: "absolute",
