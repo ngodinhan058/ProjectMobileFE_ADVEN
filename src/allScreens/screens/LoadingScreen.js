@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, } from "react-native";
-import { SkypeIndicator } from 'react-native-indicators';
+import { BallIndicator } from 'react-native-indicators';
   import { LinearGradient } from 'expo-linear-gradient';
   import { LogBox } from 'react-native';
   const LoginScreen = () => {
@@ -13,10 +13,10 @@ import { SkypeIndicator } from 'react-native-indicators';
         <View style={styles.container}>
             <Image
                 source={require('../../assets/logo.png')}
-                style={{ width: 200, height: 200, }} // URL hình ảnh đại diện
+                style={{ width: 150, height: 150, }} // URL hình ảnh đại diện
             />
             <Text style={styles.text}>Speak EZ</Text>
-            <SkypeIndicator color='#6972F0' size={90} />
+            <BallIndicator color='#6972F0' size={50} />
         </View>
     );
 };
@@ -25,14 +25,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        marginTop: "20%"
+        marginTop: "50%"
     },
     text: {
         fontSize: 40,
         paddingTop: 50,
-
-        fontFamily: 'Urbanist-Bold',
+        fontWeight: "bold"
     }
+    
 
 });
 
