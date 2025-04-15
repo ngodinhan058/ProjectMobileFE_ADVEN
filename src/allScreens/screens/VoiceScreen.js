@@ -1,19 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert, Button } from "react-native";
 import { Video, Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import Voice from '@react-native-voice/voice';
+import * as Speech from 'expo-speech';
 import axios from "axios";
 import LottieView from "lottie-react-native";
-// import * as Speech from "expo-speech";
-// import Regenerate from "../../assets/svgs/regenerate";
-// import Reload from "../../assets/svgs/reload";
-// Import video từ thư mục nội bộ
-import videoBg from "../../assets/video.mp4";  // Đường dẫn đúng vào thư mục assets
 
-// Lấy kích thước màn hình để căn chỉnh video
+import videoBg from "../../assets/video.mp4";
+
 const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
@@ -24,6 +21,7 @@ const LoginScreen = () => {
     const [AIResponse, setAIResponse] = useState(false);
     const [AISpeaking, setAISpeaking] = useState(false);
     const lottieRef = useRef(null);
+    const [transcribedText, setTranscribedText] = useState("");
 
     // get microphone permission
     const getMicrophonePermission = async () => {
@@ -100,7 +98,7 @@ const LoginScreen = () => {
             // Send the transcript to GPT-4 API for response
             await sendToGpt(transcript);
         } catch (error) {
-            console.log("Failed to stop Recording", error);
+            console.log("thông báo từ stopRecording Failed to stop Recording", error);
             Alert.alert("Error", "Failed to stop recording");
         }
     };
@@ -117,7 +115,7 @@ const LoginScreen = () => {
             formData.append("model", "whisper-1");
 
             const response = await axios.post(
-                "https://api.openai.com/v1/audio/transcriptions",
+                "", // bỏ api để upload file ghi âm
                 formData,
                 {
                     headers: {
@@ -126,13 +124,15 @@ const LoginScreen = () => {
                     },
                 }
             );
-            console.log(response.data.text);
+            console.log("thông báo từ sendAudioToWhisper",response.data.text);
 
             return response.data.text;
         } catch (error) {
             console.log(error);
         }
     };
+
+
 
     // Send text to GPT-4 API
     const sendToGpt = async (text) => {
@@ -164,7 +164,7 @@ const LoginScreen = () => {
             setText(response.data.choices[0].message.content);
         } catch (error) {
             console.error("Error sending text to GPT-3.5:", error.response?.data || error.message);
-            Alert.alert("API Error", "Failed to send request to GPT-3.5.");
+            Alert.alert("API Error", "thông báo từ sendToGpt: Failed to send request to GPT-3.5.");
         } finally {
             setLoading(false);
             setAIResponse(true);
@@ -175,14 +175,12 @@ const LoginScreen = () => {
     const speakText = async (text) => {
         setAISpeaking(true);
         const options = {
-            voice: "com.apple.ttsbundle.Samantha-compact",
-            language: "en-US",
-            pitch: 1.5,
+            language: "vi-VN",
+            pitch: 1.2,
             rate: 1,
-            onDone: () => {
-                setAISpeaking(false);
-            },
+            onDone: () => setAISpeaking(false),
         };
+
         Speech.speak(text, options);
     };
     useEffect(() => {
@@ -271,7 +269,7 @@ const LoginScreen = () => {
 
             </View>
             {/* Nội dung giao diện đăng nhập */}
-
+            <Button title="🗣 Test Speak" onPress={() => speakText("xin chào tôi là AI speak EZ. tôi có thể giúp gì cho bạn")} />
         </View>
     );
 };

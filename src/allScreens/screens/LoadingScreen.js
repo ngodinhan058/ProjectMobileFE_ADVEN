@@ -13,7 +13,7 @@ import { BallIndicator } from 'react-native-indicators';
         <View style={styles.container}>
             <Image
                 source={require('../../assets/logo.png')}
-                style={{ width: 150, height: 150, }} // URL hình ảnh đại diện
+                style={{ width: 150, height: 150, }}
             />
             <Text style={styles.text}>Speak EZ</Text>
             <BallIndicator color='#6972F0' size={50} />

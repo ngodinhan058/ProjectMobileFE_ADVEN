@@ -113,6 +113,7 @@ export default function App() {
         })}></Tab.Screen>
 
         <Tab.Screen name={"Action"} component={VoiceScreen} options={{
+          headerShown: false,
           tabBarStyle: { display: 'none' },
           tabBarIcon: ({ focused }) => (
             <View style={{
@@ -211,7 +212,7 @@ export default function App() {
 
 function EmptyScreen() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, showFooter: false, animationEnabled: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, showFooter: false }}>
 
       <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
     </Stack.Navigator>
