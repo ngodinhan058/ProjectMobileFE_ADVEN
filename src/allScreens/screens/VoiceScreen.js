@@ -300,24 +300,10 @@ const LoginScreen = () => {
                         />
                     </TouchableOpacity>
                 )}
-
-
-
-                {/* <TouchableOpacity
-                        onPress={startRecording}>
-
-                        <Image
-                            source={require('../../assets/mic.png')}
-                            style={{ width: 24, height: 24 }} // URL hình ảnh đại diện
-                        />
-                    </TouchableOpacity> */}
-
-
                 <Ionicons name="settings-outline" size={28}></Ionicons>
-
             </View>
             {/* Nội dung giao diện đăng nhập */}
-            <Button title="🗣 Test Speak" onPress={() => speakText("xin chào tôi là AI speak EZ. tôi có thể giúp gì cho bạn")} />
+            <Button title="Test Speak" onPress={() => speakText("xin chào tôi là AI speak EZ. tôi có thể giúp gì cho bạn")} />
         </ImageBackground>
     );
 };

@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { LogBox } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { useNavigation } from '@react-navigation/native';
-const LoginScreen = () => {
+const LoadingScreen = () => {
     const navigation = useNavigation();
     const [isConnected, setIsConnected] = useState(null);
     useEffect(() => {
@@ -58,4 +58,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default LoginScreen;
+export default LoadingScreen;
