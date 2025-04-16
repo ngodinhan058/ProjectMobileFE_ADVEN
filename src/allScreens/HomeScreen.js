@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 
 
-const HomeScreen = () => {
+const HomeScreen = ({setShowTabBar }) => {
   const navigation = useNavigation();
 
   return (
@@ -41,7 +41,7 @@ const HomeScreen = () => {
         </Text>
 
         {/* Start button */}
-        <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.shadow}>
+        <TouchableOpacity onPress={() => navigation.navigate('ChatScreen', { setShowTabBar })} style={styles.shadow}>
           <LinearGradient
             colors={['#7E92F8', '#6972F0']}
             style={styles.gradientButton}
@@ -51,32 +51,12 @@ const HomeScreen = () => {
         </TouchableOpacity>
 
       </View>
-      {/* <View style={{ flex: 1, justifyContent: "flex-end", alignItems: "center", zIndex: 99 }}>
-        <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.action}>
-
-        </TouchableOpacity>
-      </View> */}
-{/* 
-      <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.action}>
-
-      </TouchableOpacity> */}
-
     </View>
   );
 };
 
 
 const styles = StyleSheet.create({
-  // action: {
-  //   position: "absolute",
-  //   width: 55,
-  //   height: 55,
-  //   backgroundColor: '#6972F0',
-  //   borderRadius: 30,
-  //   bottom: 20,
-  //   zIndex: 9
-
-  // },
   container: {
     flex: 1,
     paddingTop: 60,

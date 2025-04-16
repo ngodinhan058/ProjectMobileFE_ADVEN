@@ -5,7 +5,7 @@ import 'react-native-gesture-handler';
 import { FontAwesome5 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer, useRoute } from '@react-navigation/native';
+import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,12 +13,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as encoding from 'text-encoding';
 import UUID from 'react-native-uuid';
 
-import HomeScreen from './src/allScreens/HomeScreen';
-import LoginScreen from './src/allScreens/screens/login/LoginScreen';
-import VoiceScreen from './src/allScreens/screens/VoiceScreen';
+// All Home Screen
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
+import HomeScreen from './src/allScreens/HomeScreen';
+import ChatScreen from './src/allScreens/screens/allHomeScreen/ChatScreen';
 
-import plus from './src/assets/logo.png'
+
+
+// VoiceScreen
+import VoiceScreen from './src/allScreens/screens/VoiceScreen';
+
 
 import { jwtDecode } from 'jwt-decode';
 
@@ -42,6 +46,8 @@ export default function App() {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
   const [isConnected, setIsConnected] = useState(null);
   const [checkConnected, setCheckConnected] = useState(false);
+  const [showTabBar, setShowTabBar] = useState(true);
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected);
@@ -61,6 +67,7 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
+
   return (
     <NavigationContainer>
       {checkConnected ? (
@@ -84,7 +91,7 @@ export default function App() {
             },
           }}
         >
-          <Tab.Screen name={"Home"} component={AllHomeScreen} options={{
+          <Tab.Screen name={"Home"} children={() => <AllHomeScreen setShowTabBar={setShowTabBar} />} options={{
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <View style={{
@@ -230,7 +237,7 @@ export default function App() {
         // }"
       )}
 
-      {currentScreen !== 'Action' && (
+      {currentScreen !== 'Action' && showTabBar && (
         <Animated.View
           style={{
             width: getWidth() - 20,
@@ -250,15 +257,29 @@ export default function App() {
 }
 
 
-function AllHomeScreen() {
+function AllHomeScreen({ setShowTabBar }) {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false,}}>
+    <Stack.Navigator screenOptions={{ headerShown: false, }}>
       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
-      <Stack.Screen name="HomeScreen" component={HomeScreen} />
+      <Stack.Screen
+        name="HomeScreen"
+        children={() => <HomeScreen setShowTabBar={setShowTabBar} />}
+      />
+      <Stack.Screen name="ChatScreen" component={ChatScreen} />
     </Stack.Navigator>
   );
 }
-
+// function AllHomeScreen() {
+//   const [check, setCheck] = useState('');
+//   console.log(check);
+//   return (
+//     <Stack.Navigator screenOptions={{ headerShown: false, }}>
+//       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+//       <Stack.Screen name="HomeScreen" component={HomeScreen} listeners={() => ({ focus: () => { setCheck("home") }})} />
+//       <Stack.Screen name="ChatScreen" component={ChatScreen} listeners={() => ({ focus: () => { setCheck("not") }})}/>
+//     </Stack.Navigator>
+//   );
+// }
 function SettingsScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
