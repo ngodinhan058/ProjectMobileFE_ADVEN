@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Alert, Button, ImageBackground } from "react-native";
 import { Video, Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
@@ -8,12 +8,14 @@ import Voice from '@react-native-voice/voice';
 import * as Speech from 'expo-speech';
 import axios from "axios";
 import LottieView from "lottie-react-native";
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import videoBg from "../../assets/video.mp4";
 
 const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
+    const navigation = useNavigation();
     const [text, setText] = useState("");
     const [isRecording, setIsRecording] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -21,7 +23,13 @@ const LoginScreen = () => {
     const [AIResponse, setAIResponse] = useState(false);
     const [AISpeaking, setAISpeaking] = useState(false);
     const lottieRef = useRef(null);
-    const [transcribedText, setTranscribedText] = useState("");
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                stopRecordingNotSend();
+            };
+        }, [])
+    );
 
     // get microphone permission
     const getMicrophonePermission = async () => {
@@ -90,7 +98,7 @@ const LoginScreen = () => {
 
             const uri = recording ? recording.getURI() : null;
             if (!uri) throw new Error("Recording URI is null");
-
+            // await playRecording(uri);
             // Send audio to Whisper API for transcription
             const transcript = await sendAudioToWhisper(uri);
             setText(transcript);
@@ -98,13 +106,29 @@ const LoginScreen = () => {
             // Send the transcript to GPT-4 API for response
             await sendToGpt(transcript);
         } catch (error) {
-            console.log("thông báo từ stopRecording Failed to stop Recording", error);
-            Alert.alert("Error", "Failed to stop recording");
+            // console.log("thông báo từ stopRecording Failed to stop Recording", error);
+
         }
     };
+    const stopRecordingNotSend = async () => {
+        try {
+            setIsRecording(false);
+            if (recording) {
+                await recording.stopAndUnloadAsync();
+            }
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: false,
+            });
 
+            const uri = recording ? recording.getURI() : null;
+            if (!uri) throw new Error("Recording URI is null");
+        } catch (error) {
 
+        }
+    };
     const sendAudioToWhisper = async (uri) => {
+        console.log(uri);
+        
         try {
             const formData = new FormData();
             formData.append("file", {
@@ -131,11 +155,10 @@ const LoginScreen = () => {
             console.log(error);
         }
     };
-
-
-
     // Send text to GPT-4 API
     const sendToGpt = async (text) => {
+        console.log("text", text);
+
         try {
             const response = await axios.post(
                 "https://api.openai.com/v1/chat/completions",
@@ -168,10 +191,8 @@ const LoginScreen = () => {
         } finally {
             setLoading(false);
             setAIResponse(true);
-        }
-    };
-
-
+        };
+    }
     const speakText = async (text) => {
         setAISpeaking(true);
         const options = {
@@ -190,7 +211,28 @@ const LoginScreen = () => {
             lottieRef.current?.reset();
         }
     }, [AISpeaking]);
-
+    // Check Recroding
+    const playRecording = async (uri) => {
+        try {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: uri },
+            { shouldPlay: true }
+          );
+      
+          // Optional: Lưu sound để có thể dừng lại sau
+          // setSound(sound);
+      
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.didJustFinish) {
+              console.log("✅ Ghi âm đã phát xong");
+              sound.unloadAsync(); // cleanup bộ nhớ
+            }
+          });
+      
+        } catch (error) {
+          console.error("❌ Lỗi khi phát lại ghi âm:", error);
+        }
+    };
     return (
         <ImageBackground
             style={styles.container}
@@ -220,10 +262,13 @@ const LoginScreen = () => {
                 />
             </View>
             <View style={styles.overText}>
-                <Text style={styles.text}>{loading ? "..." : text || "Press the microphone to start recording!"}</Text>
+                <Text style={styles.text}>{loading ? "..." : text || "Hãy bấm vào Micro để bắt đầu nói chuyện"}</Text>
             </View>
             <View style={styles.action}>
-                <Ionicons name="close-outline" size={28}></Ionicons>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Ionicons name="close-outline" size={28}></Ionicons>
+                </TouchableOpacity>
+
 
                 {!isRecording ? (
                     <TouchableOpacity

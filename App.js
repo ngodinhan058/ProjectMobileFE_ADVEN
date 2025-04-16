@@ -84,7 +84,7 @@ export default function App() {
             },
           }}
         >
-          <Tab.Screen name={"Home"} component={allHomeScreen} options={{
+          <Tab.Screen name={"Home"} component={AllHomeScreen} options={{
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <View style={{
@@ -224,7 +224,7 @@ export default function App() {
             },
           }}
         >
-          <Tab.Screen name={"Home"} component={allHomeScreen} options={{ headerShown: false }}></Tab.Screen>
+          <Tab.Screen name={"Home"} component={AllHomeScreen} options={{ headerShown: false }}></Tab.Screen>
 
         </Tab.Navigator>
         // }"
@@ -250,7 +250,7 @@ export default function App() {
 }
 
 
-function allHomeScreen() {
+function AllHomeScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false,}}>
       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
