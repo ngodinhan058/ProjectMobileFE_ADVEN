@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, ScrollView, Image, StyleSheet,
-  FlatList, RefreshControl, TouchableOpacity, Animated, useWindowDimensions, ImageBackground, SafeAreaView
+  FlatList, RefreshControl, TouchableOpacity, Animated, useWindowDimensions, ImageBackground, Platform
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -41,7 +41,7 @@ const HomeScreen = () => {
         </Text>
 
         {/* Start button */}
-        <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.shadow}>
+        <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.shadow}>
           <LinearGradient
             colors={['#7E92F8', '#6972F0']}
             style={styles.gradientButton}
@@ -49,7 +49,17 @@ const HomeScreen = () => {
             <Text style={styles.buttonText}>Bắt Đầu Trò Chuyện</Text>
           </LinearGradient>
         </TouchableOpacity>
+
       </View>
+      {/* <View style={{ flex: 1, justifyContent: "flex-end", alignItems: "center", zIndex: 99 }}>
+        <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.action}>
+
+        </TouchableOpacity>
+      </View> */}
+{/* 
+      <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.action}>
+
+      </TouchableOpacity> */}
 
     </View>
   );
@@ -57,11 +67,22 @@ const HomeScreen = () => {
 
 
 const styles = StyleSheet.create({
+  // action: {
+  //   position: "absolute",
+  //   width: 55,
+  //   height: 55,
+  //   backgroundColor: '#6972F0',
+  //   borderRadius: 30,
+  //   bottom: 20,
+  //   zIndex: 9
+
+  // },
   container: {
     flex: 1,
     paddingTop: 60,
     backgroundColor: '#fff',
     paddingHorizontal: 20,
+
   },
   header: {
     flexDirection: 'row',
@@ -103,7 +124,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 100,
     borderRadius: 30,
-    
+
   },
   shadow: {
     borderRadius: 30,
