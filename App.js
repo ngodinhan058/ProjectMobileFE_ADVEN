@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { BASE_URL } from './src/screens/api/config';
 import * as encoding from 'text-encoding';
 import UUID from 'react-native-uuid';
+import Toast from 'react-native-toast-message';
 
 // All Home Screen
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
@@ -252,7 +253,9 @@ export default function App() {
         />
       )
       }
+      <Toast />
     </NavigationContainer >
+    
   );
 }
 

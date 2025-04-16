@@ -12,6 +12,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { DotIndicator } from 'react-native-indicators';
+import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-toast-message';
 
 const ChatScreen = ({ navigation, route }) => {
     useFocusEffect(
@@ -55,15 +57,14 @@ const ChatScreen = ({ navigation, route }) => {
     const timeoutRef = useRef(null);
 
     useEffect(() => {
-        // AI gửi tin nhắn chào đầu tiên
         const greeting = {
             id: Date.now().toString(),
             text: "Xin chào! Mình là AI trợ lý của bạn. Có gì mình giúp được không?",
-            isSender: false, // false = AI
+            isSender: false,
         };
         setMessages([greeting]);
     }, []);
-    const AI_EMAIL = "ai-assistant@openai.com"; // Địa chỉ email giả cho AI
+    const AI_EMAIL = "ai-assistant@openai.com";
 
     // Hàm tạo phản hồi giả của AI
     const getAIResponse = (userMessage) => {
@@ -112,12 +113,40 @@ const ChatScreen = ({ navigation, route }) => {
     };
     const renderMessage = ({ item }) => (
         <View
-            style={[styles.messageContainer, item.isSender ? styles.sender : styles.receiver]}>
-            <Text style={item.isSender ? styles.messageTextSender : styles.messageText}>
+            style={[
+                styles.messageContainer,
+                item.isSender ? styles.sender : styles.receiver,
+            ]}
+        >
+            <Text
+                style={item.isSender ? styles.messageTextSender : styles.messageText}
+            >
                 {item.text}
             </Text>
+            <TouchableOpacity
+                onPress={() => copyToClipboard(item.text)}
+                style={item.isSender ? styles.copyTextSender : styles.copyText}
+            >
+                <Image
+                    source={require('../../../assets/copy.png')}
+                    style={{ width: 18, height: 20, }}
+                />
+            </TouchableOpacity>
+
         </View>
     );
+
+    // Hàm Copy
+    const copyToClipboard = async (text) => {
+        await Clipboard.setStringAsync(text);
+        Toast.show({
+            type: 'success',
+            text1: 'Đã sao chép!',
+            text2: 'Tin nhắn đã được lưu',
+            visibilityTime: 1500,
+        });
+
+    };
 
     useEffect(() => {
         if (messages.length > 0) {
@@ -201,10 +230,9 @@ const ChatScreen = ({ navigation, route }) => {
                         <Image
                             source={require('../../../assets/send.png')}
                             style={{ width: 20, height: 20 }}
-                        /></LinearGradient>
-
+                        />
+                    </LinearGradient>
                 </TouchableOpacity>)}
-
             </View>
         </View>
     );
@@ -254,7 +282,7 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 20,
         marginVertical: 5,
-        maxWidth: '75%',
+        maxWidth: '85%',
 
     },
     sender: {
@@ -272,6 +300,16 @@ const styles = StyleSheet.create({
     messageTextSender: {
         color: '#fff',
         fontSize: 16,
+    },
+    copyText: {
+        position: 'absolute',
+        top: 15,
+        right: -30,
+    },
+    copyTextSender: {
+        position: 'absolute',
+        top: 15,
+        left: -30,
     },
     inputContainer: {
         position: 'relative',
