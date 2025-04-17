@@ -7,63 +7,35 @@ import {
     TouchableOpacity,
     Image,
     StyleSheet,
+    Keyboard,
+    TouchableWithoutFeedback,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { DotIndicator } from 'react-native-indicators';
+import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-toast-message';
 
 const ChatScreen = ({ navigation, route }) => {
-    useFocusEffect(
-        useCallback(() => {
-            // Ẩn tab bar khi vào màn hình này
-            const parent = navigation.getParent();
-            parent?.setOptions({ tabBarStyle: { display: 'none' } });
-            route.params?.setShowTabBar(false);
-
-            return () => {
-                // Hiện lại tab bar khi rời khỏi
-                parent?.setOptions({
-                    tabBarStyle: {
-                        backgroundColor: 'white',
-                        position: 'absolute',
-                        bottom: 20,
-                        marginHorizontal: 20,
-                        height: 60,
-                        borderRadius: 10,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.06,
-                        shadowOffset: {
-                            width: 10,
-                            height: 10,
-                        },
-                        paddingHorizontal: 20,
-                    },
-                });
-                route.params?.setShowTabBar(true);
-            };
-        }, [])
-    );
-
-
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const [aiAnswer, setAIAnswer] = useState(false);
+    const [isInputEmpty, setIsInputEmpty] = useState(true);
 
     const flatListRef = useRef(null);
     const timeoutRef = useRef(null);
 
     useEffect(() => {
-        // AI gửi tin nhắn chào đầu tiên
         const greeting = {
             id: Date.now().toString(),
             text: "Xin chào! Mình là AI trợ lý của bạn. Có gì mình giúp được không?",
-            isSender: false, // false = AI
+            isSender: false,
         };
         setMessages([greeting]);
     }, []);
-    const AI_EMAIL = "ai-assistant@openai.com"; // Địa chỉ email giả cho AI
+    const AI_EMAIL = "ai-assistant@openai.com";
 
     // Hàm tạo phản hồi giả của AI
     const getAIResponse = (userMessage) => {
@@ -101,7 +73,7 @@ const ChatScreen = ({ navigation, route }) => {
             };
             setMessages(prevMessages => [...prevMessages, aiMessage]);
             setAIAnswer(false);
-        }, 5000);
+        }, 3000);
     };
     const stopAI = () => {
         if (timeoutRef.current) {
@@ -112,12 +84,40 @@ const ChatScreen = ({ navigation, route }) => {
     };
     const renderMessage = ({ item }) => (
         <View
-            style={[styles.messageContainer, item.isSender ? styles.sender : styles.receiver]}>
-            <Text style={item.isSender ? styles.messageTextSender : styles.messageText}>
+            style={[
+                styles.messageContainer,
+                item.isSender ? styles.sender : styles.receiver,
+            ]}
+        >
+            <Text
+                style={item.isSender ? styles.messageTextSender : styles.messageText}
+            >
                 {item.text}
             </Text>
+            {!item.isSender && <TouchableOpacity
+                onPress={() => copyToClipboard(item.text)}
+                style={item.isSender ? styles.copyTextSender : styles.copyText}
+            >
+                <Image
+                    source={require('../../../assets/copy.png')}
+                    style={{ width: 16, height: 18, }}
+                />
+            </TouchableOpacity>}
+
         </View>
     );
+
+    // Hàm Copy
+    const copyToClipboard = async (text) => {
+        await Clipboard.setStringAsync(text);
+        Toast.show({
+            type: 'success',
+            text1: 'Đã sao chép!',
+            text2: 'Tin nhắn đã được lưu',
+            visibilityTime: 1500,
+        });
+
+    };
 
     useEffect(() => {
         if (messages.length > 0) {
@@ -134,79 +134,99 @@ const ChatScreen = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={{ flex: 1 }}>
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>SpeakEZ AI</Text>
-                </View>
-                <View style={{ maxHeight: '90%' }}>
-                    <FlatList
-                        ref={flatListRef}
-                        data={messages}
-                        renderItem={renderMessage}
-                        keyExtractor={(item) => item.id}
-                        showsVerticalScrollIndicator={false}
-                    />
-                    {aiAnswer ? (<>
-                        <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
-                            <DotIndicator color='#000' size={8} count={3} />
-                        </View>
-                    </>) : (<></>)}
-                </View>
-            </View>
-            <View style={styles.inputContainer}>
-                <TextInput
-                    style={isFocused ? styles.inputFocused : styles.input}
-                    placeholder="Nhập tin nhắn..."
-                    value={inputText}
-                    onChangeText={setInputText}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    ref={searchInputRef}
-                />
-                {aiAnswer ? (<>
-                    <TouchableOpacity onPress={stopAI}>
-                        <LinearGradient
-                            colors={['#FED29F', '#FFA83F']}
-                            style={{
-                                width: 60,
-                                height: 60,
-                                borderRadius: 90,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                            <View style={{
-                                backgroundColor: 'white', // hoặc màu nền màn hình
-                                width: 55,
-                                height: 55,
-                                borderRadius: 90, // nhỏ hơn chút để lộ viền
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                                <Image
-                                    source={require('../../../assets/stop.png')}
-                                    style={{ width: 20, height: 20 }}
-                                />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={{ flex: 1 }}>
+                <View style={styles.container}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>SpeakEZ AI</Text>
+                    </View>
+                    <View style={{ maxHeight: '90%' }}>
+                        <FlatList
+                            ref={flatListRef}
+                            data={messages}
+                            renderItem={renderMessage}
+                            keyExtractor={(item) => item.id}
+                            showsVerticalScrollIndicator={false}
+                        />
+                        {aiAnswer ? (<>
+                            <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
+                                <DotIndicator color='#000' size={8} count={3} />
                             </View>
-                        </LinearGradient>
-                    </TouchableOpacity>
+                        </>) : (<></>)}
+                    </View>
+                </View>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={isFocused ? styles.inputFocused : styles.input}
+                        placeholder="Nhập tin nhắn..."
+                        value={inputText}
+                        onChangeText={(text) => {
+                            setInputText(text);
+                            setIsInputEmpty(text.trim().length === 0);
+                        }}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        ref={searchInputRef}
+                    />
 
-                </>) : (<TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                    <LinearGradient
-                        colors={['#7E92F8', '#6972F0']}
-                        style={styles.sendButton}>
-                        <Image
-                            source={require('../../../assets/send.png')}
-                            style={{ width: 20, height: 20 }}
-                        /></LinearGradient>
+                    {aiAnswer ? (<>
+                        <TouchableOpacity onPress={stopAI}>
+                            <LinearGradient
+                                colors={['#FED29F', '#FFA83F']}
+                                style={{
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: 90,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
+                                <View style={{
+                                    backgroundColor: 'white', // hoặc màu nền màn hình
+                                    width: 45,
+                                    height: 45,
+                                    borderRadius: 90, // nhỏ hơn chút để lộ viền
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
+                                    <Image
+                                        source={require('../../../assets/stop.png')}
+                                        style={{ width: 18, height: 18 }}
+                                    />
+                                </View>
+                            </LinearGradient>
+                        </TouchableOpacity>
 
-                </TouchableOpacity>)}
+                    </>) :
+                        (<>
+                            {isInputEmpty ? (<TouchableOpacity style={styles.sendButton} onPress={() => navigation.navigate('VoiceInChatScreen')}>
+                                <LinearGradient
+                                    colors={['#7E92F8', '#6972F0']}
+                                    style={styles.sendButton}>
+                                    <Icon
+                                        name="barcode-outline"
+                                        size={23}
+                                        color={'#fff'}
+                                    ></Icon>
+                                </LinearGradient>
+                            </TouchableOpacity>)
 
+                                : (<TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                                    <LinearGradient
+                                        colors={['#7E92F8', '#6972F0']}
+                                        style={styles.sendButton}>
+                                        <Image
+                                            source={require('../../../assets/send.png')}
+                                            style={{ width: 18, height: 18 }}
+                                        />
+                                    </LinearGradient>
+                                </TouchableOpacity>)}
+                        </>)}
+                </View>
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -254,7 +274,7 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 20,
         marginVertical: 5,
-        maxWidth: '75%',
+        maxWidth: '85%',
 
     },
     sender: {
@@ -273,6 +293,16 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
+    copyText: {
+        position: 'absolute',
+        top: 15,
+        right: -30,
+    },
+    copyTextSender: {
+        position: 'absolute',
+        top: 15,
+        left: -30,
+    },
     inputContainer: {
         position: 'relative',
         flexDirection: 'row',
@@ -287,7 +317,7 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         borderRadius: 50,
-        height: 65,
+        height: 50,
         paddingHorizontal: 15,
         backgroundColor: '#F5F5F5',
         borderRadius: 16,
@@ -296,7 +326,7 @@ const styles = StyleSheet.create({
     inputFocused: {
         flex: 1,
         borderRadius: 50,
-        height: 65,
+        height: 50,
         paddingHorizontal: 15,
         backgroundColor: 'rgba(113, 127, 243, 0.1)',
         borderRadius: 16,
@@ -306,8 +336,8 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         alignItems: 'flex-end',
-        width: 60,
-        height: 60,
+        width: 50,
+        height: 50,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 90,

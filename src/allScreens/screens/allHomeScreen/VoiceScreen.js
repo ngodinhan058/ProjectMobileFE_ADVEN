@@ -10,7 +10,7 @@ import axios from "axios";
 import LottieView from "lottie-react-native";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-import videoBg from "../../assets/video.mp4";
+import videoBg from "../../../assets/video.mp4";
 const { width, height } = Dimensions.get("window");
 
 const VoiceScreen = () => {
@@ -127,7 +127,7 @@ const VoiceScreen = () => {
     };
     const sendAudioToWhisper = async (uri) => {
         console.log(uri);
-        
+
         try {
             const formData = new FormData();
             formData.append("file", {
@@ -213,29 +213,29 @@ const VoiceScreen = () => {
     // Check Recroding
     const playRecording = async (uri) => {
         try {
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: uri },
-            { shouldPlay: true }
-          );
-      
-          // Optional: Lưu sound để có thể dừng lại sau
-          // setSound(sound);
-      
-          sound.setOnPlaybackStatusUpdate((status) => {
-            if (status.didJustFinish) {
-              console.log("✅ Ghi âm đã phát xong");
-              sound.unloadAsync(); // cleanup bộ nhớ
-            }
-          });
-      
+            const { sound } = await Audio.Sound.createAsync(
+                { uri: uri },
+                { shouldPlay: true }
+            );
+
+            // Optional: Lưu sound để có thể dừng lại sau
+            // setSound(sound);
+
+            sound.setOnPlaybackStatusUpdate((status) => {
+                if (status.didJustFinish) {
+                    console.log("✅ Ghi âm đã phát xong");
+                    sound.unloadAsync(); // cleanup bộ nhớ
+                }
+            });
+
         } catch (error) {
-          console.error("❌ Lỗi khi phát lại ghi âm:", error);
+            console.error("❌ Lỗi khi phát lại ghi âm:", error);
         }
     };
     return (
         <ImageBackground
             style={styles.container}
-            source={require('../../assets/bg_voice.png')}
+            source={require('../../../assets/bg_voice.png')}
             resizeMode="cover">
             {/* Video nền */}
             <Video
@@ -254,7 +254,7 @@ const VoiceScreen = () => {
             <View>
                 <LottieView
                     ref={lottieRef}
-                    source={require("../../assets/animations/ai-speaking.json")}
+                    source={require("../../../assets/animations/ai-speaking.json")}
                     autoPlay={false}
                     loop={false}
                     style={{ width: 350, height: 450 }}
@@ -291,7 +291,7 @@ const VoiceScreen = () => {
                 ) : (
                     <TouchableOpacity onPress={stopRecording}>
                         <LottieView
-                            source={require("../../assets/animations/animation.json")}
+                            source={require("../../../assets/animations/animation.json")}
                             autoPlay
                             loop
                             speed={1.3}

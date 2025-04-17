@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
 import 'react-native-gesture-handler';
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import { FontAwesome5 } from '@expo/vector-icons'
@@ -12,11 +12,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { BASE_URL } from './src/screens/api/config';
 import * as encoding from 'text-encoding';
 import UUID from 'react-native-uuid';
+import Toast from 'react-native-toast-message';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // All Home Screen
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
 import HomeScreen from './src/allScreens/HomeScreen';
 import ChatScreen from './src/allScreens/screens/allHomeScreen/ChatScreen';
+import VoiceInChatScreen from './src/allScreens/screens/allHomeScreen/VoiceScreen';
+// All Assistant Screen
+import AssistantScreen from './src/allScreens/screens/allAssistantScreen/AssistantScreen';
+
 
 
 
@@ -46,7 +52,7 @@ export default function App() {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
   const [isConnected, setIsConnected] = useState(null);
   const [checkConnected, setCheckConnected] = useState(false);
-  const [showTabBar, setShowTabBar] = useState(true);
+  const [showTabBar, setShowTabBar] = useState();
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -74,36 +80,22 @@ export default function App() {
         <Tab.Navigator
           screenOptions={{
             tabBarShowLabel: false,
-            tabBarStyle: {
-              backgroundColor: 'white',
-              position: 'absolute',
-              bottom: 20,
-              marginHorizontal: 20,
-              height: 60,
-              borderRadius: 10,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowOffset: {
-                width: 10,
-                height: 10,
-              },
-              paddingHorizontal: 20,
-            },
+           
           }}
         >
-          <Tab.Screen name={"Home"} children={() => <AllHomeScreen setShowTabBar={setShowTabBar} />} options={{
+          <Tab.Screen name={"HomeScreen"} component={AllHomeScreen} options={{
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <View style={{
-                // centring Tab Button...
                 position: 'absolute',
-                top: 20
+                top: 20,
+                alignItems: 'center',
               }} >
-                <FontAwesome5
-                  name="home"
-                  size={20}
+                <Ionicons
+                  name="chatbubble-ellipses-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -117,18 +109,19 @@ export default function App() {
             }
           })}></Tab.Screen>
 
-          <Tab.Screen name={"Search"} component={SearchScreen} options={{
+          <Tab.Screen name={"AssistantScreen"} component={AllAssistantScreen} options={{
+             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <View style={{
                 // centring Tab Button...
                 position: 'absolute',
                 top: 20
               }}>
-                <FontAwesome5
-                  name="search"
-                  size={20}
+                <Ionicons
+                  name="grid-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -176,11 +169,11 @@ export default function App() {
                 position: 'absolute',
                 top: 20
               }}>
-                <FontAwesome5
-                  name="bell"
-                  size={20}
+                <Ionicons
+                  name="time-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -194,18 +187,18 @@ export default function App() {
             }
           })}></Tab.Screen>
 
-          <Tab.Screen name={"Settings"} component={SettingsScreen} options={{
+          <Tab.Screen name={"Search"} component={SearchScreen} options={{
             tabBarIcon: ({ focused }) => (
               <View style={{
                 // centring Tab Button...
                 position: 'absolute',
                 top: 20
               }}>
-                <FontAwesome5
-                  name="user-alt"
-                  size={20}
+                <Ionicons
+                  name="person-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -231,60 +224,35 @@ export default function App() {
             },
           }}
         >
-          <Tab.Screen name={"Home"} component={AllHomeScreen} options={{ headerShown: false }}></Tab.Screen>
+          <Tab.Screen name={"HomeScreen"} component={AllHomeScreen} options={{ headerShown: false }}></Tab.Screen>
 
         </Tab.Navigator>
         // }"
       )}
-
-      {currentScreen !== 'Action' && showTabBar && (
-        <Animated.View
-          style={{
-            width: getWidth() - 20,
-            height: 2,
-            backgroundColor: '#6972F0',
-            position: 'absolute',
-            bottom: 78,
-            left: 50,
-            borderRadius: 20,
-            transform: [{ translateX: tabOffsetValue }]
-          }}
-        />
-      )
-      }
+      <Toast />
     </NavigationContainer >
+
   );
 }
 
 
-function AllHomeScreen({ setShowTabBar }) {
+function AllHomeScreen() {
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, }}>
       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
-      <Stack.Screen
-        name="HomeScreen"
-        children={() => <HomeScreen setShowTabBar={setShowTabBar} />}
-      />
+      <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen name="VoiceInChatScreen" component={VoiceInChatScreen} />
     </Stack.Navigator>
   );
 }
-// function AllHomeScreen() {
-//   const [check, setCheck] = useState('');
-//   console.log(check);
-//   return (
-//     <Stack.Navigator screenOptions={{ headerShown: false, }}>
-//       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
-//       <Stack.Screen name="HomeScreen" component={HomeScreen} listeners={() => ({ focus: () => { setCheck("home") }})} />
-//       <Stack.Screen name="ChatScreen" component={ChatScreen} listeners={() => ({ focus: () => { setCheck("not") }})}/>
-//     </Stack.Navigator>
-//   );
-// }
-function SettingsScreen() {
+
+function AllAssistantScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings!</Text>
-    </View>
+    <Stack.Navigator screenOptions={{ headerShown: false, }}>
+      <Stack.Screen name="AssistantScreen" component={AssistantScreen} />
+    </Stack.Navigator>
   );
 }
 
