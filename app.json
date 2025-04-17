@@ -19,8 +19,6 @@
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE",
-        "INTERNET",
-        "ACCESS_NETWORK_STATE",
         "RECORD_AUDIO"
       ],
       "package": "com.anonymous.projectmobile"
