@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
 import 'react-native-gesture-handler';
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import { FontAwesome5 } from '@expo/vector-icons'
@@ -13,11 +13,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as encoding from 'text-encoding';
 import UUID from 'react-native-uuid';
 import Toast from 'react-native-toast-message';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // All Home Screen
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
 import HomeScreen from './src/allScreens/HomeScreen';
 import ChatScreen from './src/allScreens/screens/allHomeScreen/ChatScreen';
+import VoiceInChatScreen from './src/allScreens/screens/allHomeScreen/VoiceScreen';
+
 
 
 
@@ -96,15 +99,14 @@ export default function App() {
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <View style={{
-                // centring Tab Button...
                 position: 'absolute',
                 top: 20
               }} >
-                <FontAwesome5
-                  name="home"
-                  size={20}
+                <Ionicons
+                  name="chatbubble-ellipses-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -125,11 +127,11 @@ export default function App() {
                 position: 'absolute',
                 top: 20
               }}>
-                <FontAwesome5
-                  name="search"
-                  size={20}
+                <Ionicons
+                  name="grid-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -177,11 +179,11 @@ export default function App() {
                 position: 'absolute',
                 top: 20
               }}>
-                <FontAwesome5
-                  name="bell"
-                  size={20}
+                <Ionicons
+                  name="time-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -202,11 +204,11 @@ export default function App() {
                 position: 'absolute',
                 top: 20
               }}>
-                <FontAwesome5
-                  name="user-alt"
-                  size={20}
+                 <Ionicons
+                  name="person-outline"
+                  size={23}
                   color={focused ? '#6972F0' : 'gray'}
-                ></FontAwesome5>
+                ></Ionicons>
               </View>
             )
           }} listeners={({ navigation, route }) => ({
@@ -255,7 +257,7 @@ export default function App() {
       }
       <Toast />
     </NavigationContainer >
-    
+
   );
 }
 
@@ -269,20 +271,11 @@ function AllHomeScreen({ setShowTabBar }) {
         children={() => <HomeScreen setShowTabBar={setShowTabBar} />}
       />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen name="VoiceInChatScreen" component={VoiceInChatScreen} />
     </Stack.Navigator>
   );
 }
-// function AllHomeScreen() {
-//   const [check, setCheck] = useState('');
-//   console.log(check);
-//   return (
-//     <Stack.Navigator screenOptions={{ headerShown: false, }}>
-//       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
-//       <Stack.Screen name="HomeScreen" component={HomeScreen} listeners={() => ({ focus: () => { setCheck("home") }})} />
-//       <Stack.Screen name="ChatScreen" component={ChatScreen} listeners={() => ({ focus: () => { setCheck("not") }})}/>
-//     </Stack.Navigator>
-//   );
-// }
+
 function SettingsScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

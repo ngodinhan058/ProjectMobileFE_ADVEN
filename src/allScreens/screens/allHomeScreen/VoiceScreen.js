@@ -9,11 +9,40 @@ import * as Speech from 'expo-speech';
 import axios from "axios";
 import LottieView from "lottie-react-native";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import hideTabBar from '../../components/hideTabBar';
 
-import videoBg from "../../assets/video.mp4";
+import videoBg from "../../../assets/video.mp4";
 const { width, height } = Dimensions.get("window");
 
-const VoiceScreen = () => {
+const VoiceScreen = ({ route }) => {
+    useFocusEffect(
+        useCallback(() => {
+            const parent = navigation.getParent();
+            parent?.setOptions({ tabBarStyle: { display: 'none' } });
+            route.params?.setShowTabBar?.(false);
+
+            return () => {
+                parent?.setOptions({
+                    tabBarStyle: {
+                        backgroundColor: 'white',
+                        position: 'absolute',
+                        bottom: 20,
+                        marginHorizontal: 20,
+                        height: 60,
+                        borderRadius: 10,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.06,
+                        shadowOffset: {
+                            width: 10,
+                            height: 10,
+                        },
+                        paddingHorizontal: 20,
+                    },
+                });
+                route.params?.setShowTabBar?.(true);
+            };
+        }, [navigation, route])
+    );
     const navigation = useNavigation();
     const [text, setText] = useState("");
     const [isRecording, setIsRecording] = useState(false);
@@ -235,7 +264,7 @@ const VoiceScreen = () => {
     return (
         <ImageBackground
             style={styles.container}
-            source={require('../../assets/bg_voice.png')}
+            source={require('../../../assets/bg_voice.png')}
             resizeMode="cover">
             {/* Video nền */}
             <Video
@@ -254,7 +283,7 @@ const VoiceScreen = () => {
             <View>
                 <LottieView
                     ref={lottieRef}
-                    source={require("../../assets/animations/ai-speaking.json")}
+                    source={require("../../../assets/animations/ai-speaking.json")}
                     autoPlay={false}
                     loop={false}
                     style={{ width: 350, height: 450 }}
@@ -291,7 +320,7 @@ const VoiceScreen = () => {
                 ) : (
                     <TouchableOpacity onPress={stopRecording}>
                         <LottieView
-                            source={require("../../assets/animations/animation.json")}
+                            source={require("../../../assets/animations/animation.json")}
                             autoPlay
                             loop
                             speed={1.3}
