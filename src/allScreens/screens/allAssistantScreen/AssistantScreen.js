@@ -13,7 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 
 
-const HomeScreen = ({ route, }) => {
+const AssistantScreen = ({ route, }) => {
   const navigation = useNavigation();
   useFocusEffect(
     useCallback(() => {
@@ -46,7 +46,7 @@ const HomeScreen = ({ route, }) => {
       {/* Header Logo */}
       <View style={styles.header}>
         <Image
-          source={require('../assets/logo.png')} // 👈 thay bằng icon bạn đang dùng
+          source={require('../../../assets/logo.png')} // 👈 thay bằng icon bạn đang dùng
           style={styles.logoIcon}
         />
         <Text style={styles.headerTitle}>SpeakEZ AI</Text>
@@ -55,7 +55,7 @@ const HomeScreen = ({ route, }) => {
       {/* Main Icon */}
       <View style={{ alignItems: 'center' }}>
         <Image
-          source={require('../assets/logo.png')} // 👈 thay bằng ảnh chính giữa
+          source={require('../../../assets/logo.png')} // 👈 thay bằng ảnh chính giữa
           style={styles.mainImage}
         />
 
@@ -63,7 +63,7 @@ const HomeScreen = ({ route, }) => {
         <Text style={styles.appTitle}>Welcome to</Text>
         <Text style={styles.appTitle}>SpeakEZ AI 👋</Text>
         <Text style={styles.description}>
-          Bắt đầu trò chuyện với AI ngay bây giờ. {"\n"}Bạn có thể hỏi tôi bất cứ điều gì.
+        AssistantScreen. {"\n"}Bạn có thể hỏi tôi bất cứ điều gì.
         </Text>
 
         {/* Start button */}
@@ -150,4 +150,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-export default HomeScreen;
+export default AssistantScreen;

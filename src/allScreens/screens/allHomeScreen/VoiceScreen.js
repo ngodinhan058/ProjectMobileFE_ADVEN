@@ -9,40 +9,11 @@ import * as Speech from 'expo-speech';
 import axios from "axios";
 import LottieView from "lottie-react-native";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import hideTabBar from '../../components/hideTabBar';
 
 import videoBg from "../../../assets/video.mp4";
 const { width, height } = Dimensions.get("window");
 
-const VoiceScreen = ({ route }) => {
-    useFocusEffect(
-        useCallback(() => {
-            const parent = navigation.getParent();
-            parent?.setOptions({ tabBarStyle: { display: 'none' } });
-            route.params?.setShowTabBar?.(false);
-
-            return () => {
-                parent?.setOptions({
-                    tabBarStyle: {
-                        backgroundColor: 'white',
-                        position: 'absolute',
-                        bottom: 20,
-                        marginHorizontal: 20,
-                        height: 60,
-                        borderRadius: 10,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.06,
-                        shadowOffset: {
-                            width: 10,
-                            height: 10,
-                        },
-                        paddingHorizontal: 20,
-                    },
-                });
-                route.params?.setShowTabBar?.(true);
-            };
-        }, [navigation, route])
-    );
+const VoiceScreen = () => {
     const navigation = useNavigation();
     const [text, setText] = useState("");
     const [isRecording, setIsRecording] = useState(false);
@@ -156,7 +127,7 @@ const VoiceScreen = ({ route }) => {
     };
     const sendAudioToWhisper = async (uri) => {
         console.log(uri);
-        
+
         try {
             const formData = new FormData();
             formData.append("file", {
@@ -242,23 +213,23 @@ const VoiceScreen = ({ route }) => {
     // Check Recroding
     const playRecording = async (uri) => {
         try {
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: uri },
-            { shouldPlay: true }
-          );
-      
-          // Optional: Lưu sound để có thể dừng lại sau
-          // setSound(sound);
-      
-          sound.setOnPlaybackStatusUpdate((status) => {
-            if (status.didJustFinish) {
-              console.log("✅ Ghi âm đã phát xong");
-              sound.unloadAsync(); // cleanup bộ nhớ
-            }
-          });
-      
+            const { sound } = await Audio.Sound.createAsync(
+                { uri: uri },
+                { shouldPlay: true }
+            );
+
+            // Optional: Lưu sound để có thể dừng lại sau
+            // setSound(sound);
+
+            sound.setOnPlaybackStatusUpdate((status) => {
+                if (status.didJustFinish) {
+                    console.log("✅ Ghi âm đã phát xong");
+                    sound.unloadAsync(); // cleanup bộ nhớ
+                }
+            });
+
         } catch (error) {
-          console.error("❌ Lỗi khi phát lại ghi âm:", error);
+            console.error("❌ Lỗi khi phát lại ghi âm:", error);
         }
     };
     return (

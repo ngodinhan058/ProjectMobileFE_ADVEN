@@ -18,34 +18,6 @@ import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 
 const ChatScreen = ({ navigation, route }) => {
-    useFocusEffect(
-        useCallback(() => {
-            const parent = navigation.getParent();
-            parent?.setOptions({ tabBarStyle: { display: 'none' } });
-            route.params?.setShowTabBar(false);
-
-            return () => {
-                parent?.setOptions({
-                    tabBarStyle: {
-                        backgroundColor: 'white',
-                        position: 'absolute',
-                        bottom: 20,
-                        marginHorizontal: 20,
-                        height: 60,
-                        borderRadius: 10,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.06,
-                        shadowOffset: {
-                            width: 10,
-                            height: 10,
-                        },
-                        paddingHorizontal: 20,
-                    },
-                });
-                route.params?.setShowTabBar(true);
-            };
-        }, [])
-    );
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [isFocused, setIsFocused] = useState(false);
