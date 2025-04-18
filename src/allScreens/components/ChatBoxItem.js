@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 import { DotIndicator } from 'react-native-indicators';
+import { BlurView } from 'expo-blur'
 
 const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
   const [messages, setMessages] = useState([]);
@@ -22,10 +23,14 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [aiAnswer, setAIAnswer] = useState(false);
   const [isInputEmpty, setIsInputEmpty] = useState(true);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
 
   const flatListRef = useRef(null);
   const timeoutRef = useRef(null);
-  const searchInputRef = useRef(null);
+  const pressTimerRef = useRef(null);
+  const messageRefs = useRef({})
 
   useEffect(() => {
     const greeting = {
@@ -90,35 +95,57 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
     });
   };
 
-  const renderMessage = ({ item }) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.isSender ? styles.sender : styles.receiver,
-      ]}
-    >
-      <Text
-        style={item.isSender ? styles.messageTextSender : styles.messageText}
+  const renderMessage = ({ item, index }) => {
+    const messageRef = messageRefs.current[index] || React.createRef();
+    messageRefs.current[index] = messageRef;
+
+    const handleLongPress = () => {
+      if (messageRef.current) {
+        messageRef.current.measureInWindow((x, y, width, height) => {
+          const modalTop = y + 90;
+          const modalLeft = item.isSender ? x + width - 160 : x + width - 140;
+          setModalPosition({ top: modalTop, left: modalLeft });
+          setSelectedMessage(item.text);
+          setShowCopyModal(true);
+        });
+      }
+    };
+
+    return (
+      <View
+        style={[
+          styles.messageContainer,
+          item.isSender ? styles.sender : styles.receiver,
+        ]}
+        ref={messageRef}
       >
-        {item.text}
-      </Text>
-      {!item.isSender && (
         <TouchableOpacity
-          onPress={() => copyToClipboard(item.text)}
-          style={styles.copyText}
+          onPressIn={() => pressTimerRef.current = setTimeout(handleLongPress, 300)}
+          onPressOut={() => clearTimeout(pressTimerRef.current)}
         >
-          <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18 }} />
+          <Text style={item.isSender ? styles.messageTextSender : styles.messageText}>
+            {item.text}
+          </Text>
         </TouchableOpacity>
-      )}
-    </View>
-  );
+        {!item.isSender && (
+          <TouchableOpacity
+            onPress={() => copyToClipboard(item.text)}
+            style={styles.copyText}
+          >
+            <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18 }} />
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   useEffect(() => {
     if (messages.length > 0) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
-
+  
+  const searchInputRef = useRef(null);
   useEffect(() => {
     setTimeout(() => {
       if (searchInputRef.current) {
@@ -128,76 +155,128 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
   }, []);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onBackPress}>
-              <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "ChatBox AI"}</Text>
-          </View>
+    <>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.container}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={onBackPress}>
+                <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "ChatBox AI"}</Text>
+            </View>
 
-          <View style={{ maxHeight: '90%' }}>
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              renderItem={renderMessage}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-            />
-            {aiAnswer && (
-              <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
-                <DotIndicator color='#000' size={8} count={3} />
-              </View>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={isFocused ? styles.inputFocused : styles.input}
-            placeholder="Nhập tin nhắn..."
-            value={inputText}
-            onChangeText={(text) => {
-              setInputText(text);
-              setIsInputEmpty(text.trim().length === 0);
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            ref={searchInputRef}
-          />
-
-          {aiAnswer ? (
-            <TouchableOpacity onPress={stopAI}>
-              <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
-                <View style={styles.innerStopButton}>
-                  <Image source={require('../../assets/stop.png')} style={{ width: 18, height: 18 }} />
+            <View style={{ maxHeight: '90%' }}>
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                renderItem={renderMessage}
+                keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={false}
+              />
+              {aiAnswer && (
+                <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
+                  <DotIndicator color='#000' size={8} count={3} />
                 </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          ) : (
-            isInputEmpty ? (
-              <TouchableOpacity style={styles.sendButton} onPress={onVoicePress}>
-                <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                  <Icon name="barcode-outline" size={23} color={'#fff'} />
+              )}
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={isFocused ? styles.inputFocused : styles.input}
+              placeholder="Nhập tin nhắn..."
+              value={inputText}
+              onChangeText={(text) => {
+                setInputText(text);
+                setIsInputEmpty(text.trim().length === 0);
+              }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              ref={searchInputRef}
+            />
+
+            {aiAnswer ? (
+              <TouchableOpacity onPress={stopAI}>
+                <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
+                  <View style={styles.innerStopButton}>
+                    <Image source={require('../../assets/stop.png')} style={{ width: 18, height: 18 }} />
+                  </View>
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                  <Image source={require('../../assets/send.png')} style={{ width: 18, height: 18 }} />
-                </LinearGradient>
-              </TouchableOpacity>
-            )
-          )}
+              isInputEmpty ? (
+                <TouchableOpacity style={styles.sendButton} onPress={onVoicePress}>
+                  <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
+                    <Icon name="barcode-outline" size={23} color={'#fff'} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                  <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
+                    <Image source={require('../../assets/send.png')} style={{ width: 18, height: 18 }} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              )
+            )}
+          </View>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+      {showCopyModal && (
+        <BlurView intensity={50} tint="light" style={styles.blurOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            onPress={() => setShowCopyModal(false)}
+          />
+          <View style={[styles.copyModal, { top: modalPosition.top, left: modalPosition.left }]}>
+            <TouchableOpacity
+              onPress={() => {
+                copyToClipboard(selectedMessage);
+                setShowCopyModal(false);
+              }}
+              style={{ width: '100%', flexDirection: 'row' }}
+            >
+              <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18, tintColor: '#0e0e0e', marginRight: 5 }} />
+              <Text style={{ color: '#0e0e0e', fontWeight: 'bold', textAlign: 'center' }}>Sao chép</Text>
+            </TouchableOpacity>
+          </View>
+        </BlurView>
+      )}
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  blurOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
+
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  copyModal: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 5,
+    width: '30%',
+    alignItems: 'center',
+    zIndex: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  copyButton: {
+    backgroundColor: '#6972F0',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
   container: {
     flex: 1,
     paddingTop: 60,
