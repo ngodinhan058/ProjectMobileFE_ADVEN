@@ -81,7 +81,7 @@ export default function App() {
         <Tab.Navigator
           screenOptions={{
             tabBarShowLabel: false,
-           
+
           }}
         >
           <Tab.Screen name={"HomeScreen"} component={AllHomeScreen} options={{
@@ -111,7 +111,7 @@ export default function App() {
           })}></Tab.Screen>
 
           <Tab.Screen name={"AssistantScreen"} component={AllAssistantScreen} options={{
-             headerShown: false,
+            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <View style={{
                 // centring Tab Button...
@@ -140,20 +140,33 @@ export default function App() {
             headerShown: false,
             tabBarStyle: { display: 'none' },
             tabBarIcon: ({ focused }) => (
-              <View style={{
-                width: 55,
-                height: 55,
-                backgroundColor: '#6972F0',
-                borderRadius: 30,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: Platform.OS == "android" ? 50 : 30
-              }}>
-                <FontAwesome5
-                  name="microphone"
-                  size={20}
-                  color={focused ? '#000' : '#fff'}
-                ></FontAwesome5>
+              <View
+                style={{
+                  width: 75,
+                  height: 75,
+                  backgroundColor: '#A9C0FF',
+                  borderRadius: 75,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: Platform.OS == "android" ? 45 : 30
+
+                }}>
+                <View style={{
+                  width: 65,
+                  height: 65,
+                  backgroundColor: '#6972F0',
+                  borderRadius: 65,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  
+                }}>
+                  <FontAwesome5
+                    name="microphone"
+                    size={20}
+                    color={focused ? '#000' : '#fff'}
+                  ></FontAwesome5>
+                </View>
+
               </View>
             )
           }} listeners={({ navigation, route }) => ({
