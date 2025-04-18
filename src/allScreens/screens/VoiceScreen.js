@@ -302,7 +302,7 @@ const VoiceScreen = () => {
                 <Ionicons name="settings-outline" size={28}></Ionicons>
             </View>
             {/* Nội dung giao diện đăng nhập */}
-            <Button title="Test Speak" onPress={() => speakText("xin chào tôi là AI speak EZ. tôi có thể giúp gì cho bạn")} />
+            <Button title="Test Speak" onPress={() => speakText("con mèo kêu sao? con cặc")} />
         </ImageBackground>
     );
 };
