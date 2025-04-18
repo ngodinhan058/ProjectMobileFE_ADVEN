@@ -141,7 +141,7 @@ const ChatScreen = ({ navigation, route }) => {
                         <TouchableOpacity onPress={() => navigation.goBack()}>
                             <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
                         </TouchableOpacity>
-                        <Text style={styles.headerTitle}>SpeakEZ AI</Text>
+                        <Text style={styles.headerTitle}>ChatBox AI</Text>
                     </View>
                     <View style={{ maxHeight: '90%' }}>
                         <FlatList
@@ -174,27 +174,9 @@ const ChatScreen = ({ navigation, route }) => {
 
                     {aiAnswer ? (<>
                         <TouchableOpacity onPress={stopAI}>
-                            <LinearGradient
-                                colors={['#FED29F', '#FFA83F']}
-                                style={{
-                                    width: 50,
-                                    height: 50,
-                                    borderRadius: 90,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}>
-                                <View style={{
-                                    backgroundColor: 'white', // hoặc màu nền màn hình
-                                    width: 45,
-                                    height: 45,
-                                    borderRadius: 90, // nhỏ hơn chút để lộ viền
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}>
-                                    <Image
-                                        source={require('../../../assets/stop.png')}
-                                        style={{ width: 18, height: 18 }}
-                                    />
+                            <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
+                                <View style={styles.innerStopButton}>
+                                    <Image source={require('../../../assets/stop.png')} style={{ width: 18, height: 18 }} />
                                 </View>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -345,6 +327,21 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: '#fff',
         fontSize: 16,
+    },
+    stopButton: {
+        width: 50,
+        height: 50,
+        borderRadius: 90,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    innerStopButton: {
+        backgroundColor: 'white',
+        width: 45,
+        height: 45,
+        borderRadius: 90,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 

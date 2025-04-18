@@ -22,6 +22,7 @@ import ChatScreen from './src/allScreens/screens/allHomeScreen/ChatScreen';
 import VoiceInChatScreen from './src/allScreens/screens/allHomeScreen/VoiceScreen';
 // All Assistant Screen
 import AssistantScreen from './src/allScreens/screens/allAssistantScreen/AssistantScreen';
+import ChatAssistantScreen from './src/allScreens/screens/allAssistantScreen/ChatAssistantScreen';
 
 
 
@@ -237,7 +238,6 @@ export default function App() {
 
 
 function AllHomeScreen() {
-
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, }}>
       <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
@@ -252,6 +252,7 @@ function AllAssistantScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, }}>
       <Stack.Screen name="AssistantScreen" component={AssistantScreen} />
+      <Stack.Screen name="ChatAssistantScreen" component={ChatAssistantScreen} />
     </Stack.Navigator>
   );
 }
