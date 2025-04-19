@@ -76,7 +76,7 @@ const ChatBox = ({ headerTitle, onVoicePress }) => {
     setAIAnswer(true);
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzQ1MDcxMDE1fQ.N5MVKc6R8pX5U8G5oyaL-92GHBMd5ETZPfzCNssDjD4`, // Thay YOUR_ACCESS_TOKEN bằng token thực tế của bạn
+      'Authorization': `token`, // Thay YOUR_ACCESS_TOKEN bằng token thực tế của bạn
     };
     try {
       const response = await axios.post('https://b59f-2405-4802-8151-df90-e815-a59f-5fd0-ee7e.ngrok-free.app/questions/3', {
