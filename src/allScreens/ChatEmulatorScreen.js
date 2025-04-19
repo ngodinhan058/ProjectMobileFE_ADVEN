@@ -124,7 +124,7 @@ const ChatScreen = ({ navigation, route }) => {
                         onPress={() => copyToClipboard(item.text)}
                         style={styles.copyText}
                     >
-                        <Image source={require('../../../assets/copy.png')} style={{ width: 16, height: 18 }} />
+                        <Image source={require('../assets/copy.png')} style={{ width: 16, height: 18 }} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -202,7 +202,7 @@ const ChatScreen = ({ navigation, route }) => {
                             <TouchableOpacity onPress={stopAI}>
                                 <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
                                     <View style={styles.innerStopButton}>
-                                        <Image source={require('../../../assets/stop.png')} style={{ width: 18, height: 18 }} />
+                                        <Image source={require('../assets/stop.png')} style={{ width: 18, height: 18 }} />
                                     </View>
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -226,7 +226,7 @@ const ChatScreen = ({ navigation, route }) => {
                                             colors={['#7E92F8', '#6972F0']}
                                             style={styles.sendButton}>
                                             <Image
-                                                source={require('../../../assets/send.png')}
+                                                source={require('../assets/send.png')}
                                                 style={{ width: 18, height: 18 }}
                                             />
                                         </LinearGradient>
@@ -249,7 +249,7 @@ const ChatScreen = ({ navigation, route }) => {
                             }}
                             style={{ width: '100%', flexDirection: 'row' }}
                         >
-                            <Image source={require('../../../assets/copy.png')} style={{ width: 16, height: 18, tintColor: '#0e0e0e', marginRight: 5 }} />
+                            <Image source={require('../assets/copy.png')} style={{ width: 16, height: 18, tintColor: '#0e0e0e', marginRight: 5 }} />
                             <Text style={{ color: '#0e0e0e', fontWeight: 'bold', textAlign: 'center' }}>Sao chép</Text>
                         </TouchableOpacity>
                     </View>

@@ -1,87 +1,32 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  View, Text, TextInput, ScrollView, Image, StyleSheet,
-  FlatList, RefreshControl, TouchableOpacity, Animated, useWindowDimensions, ImageBackground, Platform
-} from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
-import axios from 'axios';
-// import { BASE_URL } from './api/config';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-
-
-const HomeScreen = ({ route, }) => {
+const HomeScreen = ({ title }) => {
   const navigation = useNavigation();
-  useFocusEffect(
-    useCallback(() => {
-      const parent = navigation.getParent();
-      parent?.setOptions({
-        tabBarStyle: {
-          backgroundColor: 'white',
-          position: 'absolute',
-          bottom: 20,
-          marginHorizontal: 20,
-          height: 60,
-          borderRadius: 10,
-          shadowColor: '#000',
-          shadowOpacity: 0.06,
-          shadowOffset: {
-            width: 10,
-            height: 10,
-          },
-          paddingHorizontal: 20,
-        },
-      });
-
-      return () => {
-        parent?.setOptions({ tabBarStyle: { display: 'none' } });
-      };
-    }, [])
-  );
   return (
     <View style={styles.container}>
-      {/* Header Logo */}
       <View style={styles.header}>
-        <Image
-          source={require('../assets/logo.png')} // 👈 thay bằng icon bạn đang dùng
-          style={styles.logoIcon}
-        />
-        <Text style={styles.headerTitle}>SpeakEZ AI</Text>
+        <Image source={require('../assets/logo.png')} style={styles.logoIcon} />
+        <Text style={styles.headerTitle}>{title}</Text>
       </View>
-
-      {/* Main Icon */}
       <View style={{ alignItems: 'center' }}>
-        <Image
-          source={require('../assets/logo.png')} // 👈 thay bằng ảnh chính giữa
-          style={styles.mainImage}
-        />
-
-        {/* Welcome text */}
+        <Image source={require('../assets/logo.png')} style={styles.mainImage} />
         <Text style={styles.appTitle}>Welcome to</Text>
         <Text style={styles.appTitle}>SpeakEZ AI 👋</Text>
         <Text style={styles.description}>
           Bắt đầu trò chuyện với AI ngay bây giờ. {"\n"}Bạn có thể hỏi tôi bất cứ điều gì.
         </Text>
-
-        {/* Start button */}
-        <TouchableOpacity onPress={() => navigation.navigate('ChatScreen')} style={styles.shadow}>
-          <LinearGradient
-            colors={['#7E92F8', '#6972F0']}
-            style={styles.gradientButton}
-          >
+        <TouchableOpacity onPress={() => navigation.replace('ChatScreen')} style={styles.shadow}>
+          <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.gradientButton}>
             <Text style={styles.buttonText}>Bắt Đầu Trò Chuyện</Text>
           </LinearGradient>
         </TouchableOpacity>
-
       </View>
     </View>
   );
 };
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -150,4 +95,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-export default HomeScreen;
+export default HomeScreen
