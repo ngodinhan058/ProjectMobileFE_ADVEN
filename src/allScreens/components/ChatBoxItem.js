@@ -16,8 +16,12 @@ import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
 import { DotIndicator } from 'react-native-indicators';
 import { BlurView } from 'expo-blur'
+import axios from 'axios';
+import * as Speech from 'expo-speech';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
+
+const ChatBox = ({ headerTitle, onVoicePress }) => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -26,6 +30,7 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [AISpeaking, setAISpeaking] = useState(false);
 
   const flatListRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -35,25 +40,28 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
   useEffect(() => {
     const greeting = {
       id: Date.now().toString(),
-      text: "Xin chào! Mình là AI trợ lý của bạn. Có gì mình giúp được không?",
-      isSender: false,
+      text: "Hello! I'm AI assisting you. How can I help?",
+      isSender: false, // false là Ai, true là user
     };
     setMessages([greeting]);
   }, []);
 
-  const getAIResponse = (userMessage) => {
-    const responses = [
-      "Mình hiểu rồi! Bạn muốn hỏi thêm gì không?",
-      "Haha, câu đó thú vị đó!",
-      "Tôi là AI đây, bạn cần giúp gì?",
-      "Câu hỏi hay đấy! Nhưng hơi khó nha 🤔",
-      "Cho mình suy nghĩ chút nhé...",
-    ];
-    const randomIndex = Math.floor(Math.random() * responses.length);
-    return responses[randomIndex];
-  };
+  const speakText = async (text) => {
+    setAISpeaking(true);
+    const options = {
+      language: "ja-JP",
+      pitch: 1.2,
+      rate: 1,
+      onDone: () => setAISpeaking(false),
+    };
 
-  const sendMessage = () => {
+    Speech.speak(text, options);
+  };
+  const stopSpeaking = () => {
+    Speech.stop();
+    setAISpeaking(false);
+  };
+  const sendMessage = async () => {
     if (!inputText.trim()) return;
 
     const userMessage = {
@@ -66,15 +74,29 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
     setInputText('');
 
     setAIAnswer(true);
-    timeoutRef.current = setTimeout(() => {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzQ1MDcxMDE1fQ.N5MVKc6R8pX5U8G5oyaL-92GHBMd5ETZPfzCNssDjD4`, // Thay YOUR_ACCESS_TOKEN bằng token thực tế của bạn
+    };
+    try {
+      const response = await axios.post('https://b59f-2405-4802-8151-df90-e815-a59f-5fd0-ee7e.ngrok-free.app/questions/3', {
+        content: inputText.trim(), // Truyền tin nhắn từ người dùng
+      }, {
+        headers: headers, // Thêm headers vào request
+      });
+
+      // Xử lý phản hồi từ API
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        text: getAIResponse(inputText),
+        text: response.data.content, // Lấy dữ liệu phản hồi từ API
         isSender: false,
       };
       setMessages(prev => [...prev, aiMessage]);
       setAIAnswer(false);
-    }, 3000);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setAIAnswer(false);
+    }
   };
 
   const stopAI = () => {
@@ -128,14 +150,45 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
           </Text>
         </TouchableOpacity>
         {!item.isSender && (
-          <TouchableOpacity
-            onPress={() => copyToClipboard(item.text)}
-            style={styles.copyText}
-          >
-            <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18 }} />
-          </TouchableOpacity>
-        )}
-      </View>
+          <>
+            <TouchableOpacity
+              onPress={() => copyToClipboard(item.text)}
+              style={styles.copyText}
+            >
+              <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18 }} />
+
+
+            </TouchableOpacity>
+            {AISpeaking ? (
+              <TouchableOpacity
+                onPress={() => stopSpeaking()}
+                style={styles.micText}
+              >
+
+                <Ionicons
+                  name="mic-off-circle-outline"
+                  size={22}
+                  color="#2b3356"
+                />
+
+              </TouchableOpacity>) :
+              (<TouchableOpacity
+                onPress={() => speakText(item.text)}
+                style={styles.micText}
+              >
+
+                <Ionicons
+                  name="mic-circle-outline"
+                  size={22}
+                  color="#2b3356"
+                />
+
+              </TouchableOpacity>
+              )}
+          </>
+        )
+        }
+      </View >
     );
   };
 
@@ -144,7 +197,7 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
-  
+
   const searchInputRef = useRef(null);
   useEffect(() => {
     setTimeout(() => {
@@ -160,7 +213,7 @@ const ChatBox = ({ onBackPress, headerTitle, onVoicePress }) => {
         <View style={{ flex: 1 }}>
           <View style={styles.container}>
             <View style={styles.header}>
-              <TouchableOpacity onPress={onBackPress}>
+              <TouchableOpacity onPress={'....'}>
                 <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "ChatBox AI"}</Text>
@@ -343,10 +396,10 @@ const styles = StyleSheet.create({
     top: 15,
     right: -30,
   },
-  copyTextSender: {
+  micText: {
     position: 'absolute',
-    top: 15,
-    left: -30,
+    top: 40,
+    right: -32,
   },
   inputContainer: {
     position: 'relative',

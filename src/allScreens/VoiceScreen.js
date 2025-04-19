@@ -254,7 +254,7 @@ const VoiceScreen = () => {
             <View>
                 <LottieView
                     ref={lottieRef}
-                    source={require("../../../assets/animations/ai-speaking.json")}
+                    source={require("../assets/animations/ai-speaking.json")}
                     autoPlay={false}
                     loop={false}
                     style={{ width: 350, height: 450 }}
@@ -291,7 +291,7 @@ const VoiceScreen = () => {
                 ) : (
                     <TouchableOpacity onPress={stopRecording}>
                         <LottieView
-                            source={require("../../../assets/animations/animation.json")}
+                            source={require("../assets/animations/animation.json")}
                             autoPlay
                             loop
                             speed={1.3}
