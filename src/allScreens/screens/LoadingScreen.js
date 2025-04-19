@@ -22,7 +22,7 @@ const LoadingScreen = () => {
           const state = await NetInfo.fetch();
           if (state.isConnected) {
             setTimeout(() => {
-              navigation.replace('HomeScreen');
+              navigation.replace('MainApp');
             }, 1500);
           }
         };

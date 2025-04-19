@@ -133,20 +133,20 @@ function SidebarNavigator() {
 function AllHomeScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, }}>
-      <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
-      {/* <Stack.Screen name="VoiceInChatScreen" component={VoiceInChatScreen} /> */}
     </Stack.Navigator>
   );
 }
 export default function App() {
   return (
     <NavigationContainer>
-      <SidebarNavigator />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+        <Stack.Screen name="MainApp" component={SidebarNavigator} />
+      </Stack.Navigator>
       <Toast />
-    </NavigationContainer >
-
+    </NavigationContainer>
   );
 }
 
