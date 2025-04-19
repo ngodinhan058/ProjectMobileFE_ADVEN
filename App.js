@@ -144,6 +144,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
         <Stack.Screen name="MainApp" component={SidebarNavigator} />
+        <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>

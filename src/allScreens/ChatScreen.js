@@ -24,8 +24,8 @@ const ChatScreen = ({ navigation, title }) => {
       }
     };
 
-    if (Platform.OS === 'android') {
-      BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      if (Platform.OS === 'android') {
+        BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     }
 
     return () => {
@@ -39,7 +39,7 @@ const ChatScreen = ({ navigation, title }) => {
   return (
     <ChatBoxItem
       headerTitle={title}
-      onVoicePress={() => navigation.navigate('...')}
+      onVoicePress={() => navigation.navigate('VoiceScreen')}
     />
   );
 };
