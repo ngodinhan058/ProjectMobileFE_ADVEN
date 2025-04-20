@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, ScrollView} from 'react-native';
+import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
 
 import Toast from 'react-native-toast-message';
 
@@ -41,8 +43,12 @@ const screens = [
 ];
 
 function CustomDrawerContent(props) {
-  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation();
+  const animatedValues = useRef({}).current;
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [deleteVisible, setDeleteVisible] = useState(null);
+  const currentRoute = props.state.routeNames[props.state.index];
 
   const filteredScreens = screens.filter(screen =>
     screen.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -67,16 +73,95 @@ function CustomDrawerContent(props) {
 
         {/* Drawer items list scrolls naturally */}
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {filteredScreens.map((screen, index) => (
-            <DrawerItem
-              key={index}
-              label={screen.name}
-              onPress={() => {
-                props.navigation.navigate(screen.name);
-                setSearchQuery('');
-              }}
-            />
-          ))}
+          {filteredScreens.map((screen, index) => {
+            const isFocused = currentRoute === screen.name;
+            const isDeleteMode = deleteVisible === screen.name;
+
+            if (!animatedValues[screen.name]) {
+              animatedValues[screen.name] = new Animated.Value(0);
+            }
+
+            useEffect(() => {
+              Object.entries(animatedValues).forEach(([name, anim]) => {
+                Animated.timing(anim, {
+                  toValue: deleteVisible === name ? -60 : 0,
+                  duration: 300,
+                  useNativeDriver: true,
+                }).start();
+              });
+            }, [deleteVisible]);
+
+            return (
+              <TouchableWithoutFeedback onPress={() => setDeleteVisible(null)} key={index}>
+                <View style={{ overflow: 'hidden', marginVertical: 4, }}>
+                  <Animated.View
+                    style={{
+                      flexDirection: 'row',
+                      transform: [{ translateX: animatedValues[screen.name] }],
+                    }}
+                  >
+                    {/* Drawer item */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (isDeleteMode) {
+                          setDeleteVisible(null);
+                        } else {
+                          props.navigation.navigate(screen.name);
+                          setSearchQuery('');
+                          setDeleteVisible(null);
+                        }
+                      }}
+                      onLongPress={() => setDeleteVisible(screen.name)}
+                      delayLongPress={300}
+                      style={{
+                        width: "100%",
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: '#fafafa',
+                        borderRadius: 8,
+                        borderTopRightRadius: deleteVisible == screen.name ? 0 : 8,
+                        borderBottomRightRadius: deleteVisible == screen.name ? 0 : 8,
+                        paddingVertical: 18,
+                        paddingHorizontal: 12,
+                      }}
+                    >
+                      <View>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#212121' }}>{screen.name}</Text>
+                        <Text style={{ fontSize: 12,color: '#616161' }}>29 Dec 2023 - 09:41 AM</Text>
+                      </View>
+                      {isFocused ? (<View style={{ width: 12, height: 12, backgroundColor: '#00FF09', borderRadius: 12 }} ></View>)
+                        : (<Ionicons name="chevron-forward" size={18} color="#888" />)}
+
+                    </TouchableOpacity>
+
+                    {/* Trash button */}
+                    <View
+                      style={{
+                        width: 60,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderTopRightRadius: 8,
+                        borderBottomRightRadius: 8,
+                        backgroundColor: "red"
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          console.log('Delete', screen.name);
+                          setDeleteVisible(null);
+                        }}
+                      >
+                        <Ionicons name="trash-outline" size={18} color="white" />
+                      </TouchableOpacity>
+                    </View>
+                  </Animated.View>
+                </View>
+              </TouchableWithoutFeedback>
+            );
+          })}
+
+
         </ScrollView>
       </View>
 
