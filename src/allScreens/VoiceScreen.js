@@ -195,7 +195,7 @@ const VoiceScreen = () => {
     const speakText = async (text) => {
         setAISpeaking(true);
         const options = {
-            language: "vi-VN",
+            language: "ja-JP",
             pitch: 1.2,
             rate: 1,
             onDone: () => setAISpeaking(false),

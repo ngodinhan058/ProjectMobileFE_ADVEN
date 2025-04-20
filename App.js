@@ -16,13 +16,14 @@ import ChatEmulatorScreen from './src/allScreens/ChatEmulatorScreen';
 // VoiceScreen
 import VoiceScreen from './src/allScreens/screens/VoiceScreen';
 
+import ModalComponent from './src/allScreens/components/ModalComponent';
+
 
 import { jwtDecode } from 'jwt-decode';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
-
 const screens = [
   { name: 'Chào hỏi trợ giúp' },
   { name: 'Giải thích bài đọc hiểu' },
@@ -53,140 +54,152 @@ function CustomDrawerContent(props) {
   const filteredScreens = screens.filter(screen =>
     screen.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const handleDelete = () => {
+    // xử lý xoá ở đây
+    console.log('Confirmed delete!');
+    setIsModalVisible(false);
+  };
   return (
-    <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
-      <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
-        {/* Search input */}
-        <TextInput
-          placeholder="Tìm kiếm..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={{
-            backgroundColor: '#f0f0f0',
-            borderRadius: 8,
-            padding: 10,
-            marginBottom: 10,
-            fontSize: 16,
-          }}
-        />
+    <>
+      <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
+        <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
+          {/* Search input */}
+          <TextInput
+            placeholder="Tìm kiếm..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={{
+              backgroundColor: '#f0f0f0',
+              borderRadius: 8,
+              padding: 10,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+          />
 
-        {/* Drawer items list scrolls naturally */}
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {filteredScreens.map((screen, index) => {
-            const isFocused = currentRoute === screen.name;
-            const isDeleteMode = deleteVisible === screen.name;
+          {/* Drawer items list scrolls naturally */}
+          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+            {filteredScreens.map((screen, index) => {
+              const isFocused = currentRoute === screen.name;
+              const isDeleteMode = deleteVisible === screen.name;
 
-            if (!animatedValues[screen.name]) {
-              animatedValues[screen.name] = new Animated.Value(0);
-            }
+              if (!animatedValues[screen.name]) {
+                animatedValues[screen.name] = new Animated.Value(0);
+              }
 
-            useEffect(() => {
-              Object.entries(animatedValues).forEach(([name, anim]) => {
-                Animated.timing(anim, {
-                  toValue: deleteVisible === name ? -60 : 0,
-                  duration: 300,
-                  useNativeDriver: true,
-                }).start();
-              });
-            }, [deleteVisible]);
+              useEffect(() => {
+                Object.entries(animatedValues).forEach(([name, anim]) => {
+                  Animated.timing(anim, {
+                    toValue: deleteVisible === name ? -60 : 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                  }).start();
+                });
+              }, [deleteVisible]);
 
-            return (
-              <TouchableWithoutFeedback onPress={() => setDeleteVisible(null)} key={index}>
-                <View style={{ overflow: 'hidden', marginVertical: 4, }}>
-                  <Animated.View
-                    style={{
-                      flexDirection: 'row',
-                      transform: [{ translateX: animatedValues[screen.name] }],
-                    }}
-                  >
-                    {/* Drawer item */}
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (isDeleteMode) {
-                          setDeleteVisible(null);
-                        } else {
-                          props.navigation.navigate(screen.name);
-                          setSearchQuery('');
-                          setDeleteVisible(null);
-                        }
-                      }}
-                      onLongPress={() => setDeleteVisible(screen.name)}
-                      delayLongPress={300}
+              return (
+                <TouchableWithoutFeedback onPress={() => setDeleteVisible(null)} key={index}>
+                  <View style={{ overflow: 'hidden', marginVertical: 4, }}>
+                    <Animated.View
                       style={{
-                        width: "100%",
                         flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        backgroundColor: '#fafafa',
-                        borderRadius: 8,
-                        borderTopRightRadius: deleteVisible == screen.name ? 0 : 8,
-                        borderBottomRightRadius: deleteVisible == screen.name ? 0 : 8,
-                        paddingVertical: 18,
-                        paddingHorizontal: 12,
+                        transform: [{ translateX: animatedValues[screen.name] }],
                       }}
                     >
-                      <View>
-                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#212121' }}>{screen.name}</Text>
-                        <Text style={{ fontSize: 12,color: '#616161' }}>29 Dec 2023 - 09:41 AM</Text>
-                      </View>
-                      {isFocused ? (<View style={{ width: 12, height: 12, backgroundColor: '#00FF09', borderRadius: 12 }} ></View>)
-                        : (<Ionicons name="chevron-forward" size={18} color="#888" />)}
-
-                    </TouchableOpacity>
-
-                    {/* Trash button */}
-                    <View
-                      style={{
-                        width: 60,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        borderTopRightRadius: 8,
-                        borderBottomRightRadius: 8,
-                        backgroundColor: "red"
-                      }}
-                    >
+                      {/* Drawer item */}
                       <TouchableOpacity
                         onPress={() => {
-                          console.log('Delete', screen.name);
-                          setDeleteVisible(null);
+                          if (isDeleteMode) {
+                            setDeleteVisible(null);
+                          } else {
+                            props.navigation.navigate(screen.name);
+                            setSearchQuery('');
+                            setDeleteVisible(null);
+                          }
+                        }}
+                        onLongPress={() => setDeleteVisible(screen.name)}
+                        delayLongPress={300}
+                        style={{
+                          width: "100%",
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          backgroundColor: '#fafafa',
+                          borderRadius: 8,
+                          borderTopRightRadius: deleteVisible == screen.name ? 0 : 8,
+                          borderBottomRightRadius: deleteVisible == screen.name ? 0 : 8,
+                          paddingVertical: 18,
+                          paddingHorizontal: 12,
                         }}
                       >
-                        <Ionicons name="trash-outline" size={18} color="white" />
+                        <View>
+                          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#212121' }}>{screen.name}</Text>
+                          <Text style={{ fontSize: 12, color: '#616161' }}>29 Dec 2023 - 09:41 AM</Text>
+                        </View>
+                        {isFocused ? (<View style={{ width: 12, height: 12, backgroundColor: '#00FF09', borderRadius: 12 }} ></View>)
+                          : (<Ionicons name="chevron-forward" size={18} color="#888" />)}
+
                       </TouchableOpacity>
-                    </View>
-                  </Animated.View>
-                </View>
-              </TouchableWithoutFeedback>
-            );
-          })}
 
+                      {/* Trash button */}
+                      <View
+                        style={{
+                          width: 60,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          borderTopRightRadius: 8,
+                          borderBottomRightRadius: 8,
+                          backgroundColor: "red"
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            setDeleteVisible(null);
+                            setIsModalVisible(true);
+                          }}
+                        >
+                          <Ionicons name="trash-outline" size={18} color="white" />
+                        </TouchableOpacity>
+                      </View>
+                    </Animated.View>
+                  </View>
+                </TouchableWithoutFeedback>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-        </ScrollView>
-      </View>
+        {/* Fixed login at bottom */}
+        <View style={{
+          padding: 8,
+          borderTopWidth: 1,
+          borderColor: '#eee',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+        }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ChatScreen')}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Image
+              source={require('./src/assets/logo.png')}
+              style={{ width: 50, height: 50, marginHorizontal: 8 }}
+              resizeMode="contain"
+            />
+            <Text style={{ fontSize: 16, fontWeight: '500' }}>Login</Text>
+          </TouchableOpacity>
+        </View>
+        <ModalComponent
+          visible={isModalVisible}
+          onConfirm={handleDelete}
+          onCancel={() => setIsModalVisible(false)}
+        />
+      </DrawerContentScrollView>
 
-      {/* Fixed login at bottom */}
-      <View style={{
-        padding: 8,
-        borderTopWidth: 1,
-        borderColor: '#eee',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-      }}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ChatScreen')}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
-        >
-          <Image
-            source={require('./src/assets/logo.png')}
-            style={{ width: 50, height: 50, marginHorizontal: 8 }}
-            resizeMode="contain"
-          />
-          <Text style={{ fontSize: 16, fontWeight: '500' }}>Login</Text>
-        </TouchableOpacity>
-      </View>
-    </DrawerContentScrollView>
+    </>
   );
 }
 

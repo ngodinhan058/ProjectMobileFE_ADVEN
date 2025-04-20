@@ -21,7 +21,7 @@ import * as Speech from 'expo-speech';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
-const ChatBox = ({ headerTitle, onVoicePress }) => {
+const ChatBox = ({ headerTitle, onVoicePress }) => {  
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
