@@ -36,6 +36,7 @@
     "jwt-decode": "^4.0.0",
     "lottie-ios": "^4.5.1",
     "lottie-react-native": "^7.1.0",
+    "my-project-mobile": "file:",
     "react": "18.3.1",
     "react-loading-skeleton": "^3.5.0",
     "react-native": "^0.76.9",

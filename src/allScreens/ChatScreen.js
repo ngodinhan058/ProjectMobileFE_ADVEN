@@ -1,45 +1,49 @@
-import React, { useEffect, useRef } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useRef } from 'react';
 import { BackHandler, ToastAndroid, Platform } from 'react-native';
-import ChatBoxItem from './components/ChatBoxItem';
+import ChatBoxItem from '../components/ChatBoxItem';
 
-const ChatScreen = ({ navigation, title }) => {
+const ChatScreen = ({ title }) => {
   const backPressCount = useRef(0);
   const timeoutRef = useRef(null);
+  const navigation = useNavigation();
 
-  useEffect(() => {
-    const handleBackPress = () => {
-      if (backPressCount.current === 0) {
-        backPressCount.current += 1;
-        ToastAndroid.show('Nhấn thêm lần nữa để thoát ứng dụng', ToastAndroid.SHORT);
+  useFocusEffect(
+    React.useCallback(() => {
+      const handleBackPress = () => {
+        if (backPressCount.current === 0) {
+          backPressCount.current += 1;
+          ToastAndroid.show('Nhấn thêm lần nữa để thoát ứng dụng', ToastAndroid.SHORT);
 
-        // Reset lại sau 2 giây
-        timeoutRef.current = setTimeout(() => {
-          backPressCount.current = 0;
-        }, 2000);
+          timeoutRef.current = setTimeout(() => {
+            backPressCount.current = 0;
+          }, 2000);
 
-        return true; // chặn thoát app ngay
-      } else {
-        BackHandler.exitApp(); // thoát app
-        return true;
-      }
-    };
+          return true;
+        } else {
+          BackHandler.exitApp();
+          return true;
+        }
+      };
 
       if (Platform.OS === 'android') {
         BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-    }
-
-    return () => {
-      if (Platform.OS === 'android') {
-        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
       }
-    };
-  }, []);
+
+      return () => {
+        if (Platform.OS === 'android') {
+          BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        }
+      };
+    }, [])
+  );
 
   return (
     <ChatBoxItem
       headerTitle={title}
       onVoicePress={() => navigation.navigate('VoiceScreen')}
+      openDrawer={() => navigation.openDrawer()}
     />
   );
 };

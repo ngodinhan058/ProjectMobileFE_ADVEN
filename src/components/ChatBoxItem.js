@@ -21,7 +21,7 @@ import * as Speech from 'expo-speech';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
-const ChatBox = ({ headerTitle, onVoicePress }) => {  
+const ChatBox = ({ headerTitle, onVoicePress, openDrawer }) => {  
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -155,7 +155,7 @@ const ChatBox = ({ headerTitle, onVoicePress }) => {
               onPress={() => copyToClipboard(item.text)}
               style={styles.copyText}
             >
-              <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18 }} />
+              <Image source={require('../assets/copy.png')} style={{ width: 16, height: 18 }} />
 
 
             </TouchableOpacity>
@@ -213,8 +213,8 @@ const ChatBox = ({ headerTitle, onVoicePress }) => {
         <View style={{ flex: 1 }}>
           <View style={styles.container}>
             <View style={styles.header}>
-              <TouchableOpacity onPress={'....'}>
-                <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
+              <TouchableOpacity onPress={openDrawer}>
+                <Icon name="list-outline" size={28} color="#000" style={styles.logoIcon} />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "ChatBox AI"}</Text>
             </View>
@@ -253,7 +253,7 @@ const ChatBox = ({ headerTitle, onVoicePress }) => {
               <TouchableOpacity onPress={stopAI}>
                 <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
                   <View style={styles.innerStopButton}>
-                    <Image source={require('../../assets/stop.png')} style={{ width: 18, height: 18 }} />
+                    <Image source={require('../assets/stop.png')} style={{ width: 18, height: 18 }} />
                   </View>
                 </LinearGradient>
               </TouchableOpacity>
@@ -267,7 +267,7 @@ const ChatBox = ({ headerTitle, onVoicePress }) => {
               ) : (
                 <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
                   <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                    <Image source={require('../../assets/send.png')} style={{ width: 18, height: 18 }} />
+                    <Image source={require('../assets/send.png')} style={{ width: 18, height: 18 }} />
                   </LinearGradient>
                 </TouchableOpacity>
               )
@@ -289,7 +289,7 @@ const ChatBox = ({ headerTitle, onVoicePress }) => {
               }}
               style={{ width: '100%', flexDirection: 'row' }}
             >
-              <Image source={require('../../assets/copy.png')} style={{ width: 16, height: 18, tintColor: '#0e0e0e', marginRight: 5 }} />
+              <Image source={require('../assets/copy.png')} style={{ width: 16, height: 18, tintColor: '#0e0e0e', marginRight: 5 }} />
               <Text style={{ color: '#0e0e0e', fontWeight: 'bold', textAlign: 'center' }}>Sao chép</Text>
             </TouchableOpacity>
           </View>

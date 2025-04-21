@@ -12,11 +12,13 @@ import LoadingScreen from './src/allScreens/screens/LoadingScreen';
 import HomeScreen from './src/allScreens/HomeScreen';
 import ChatScreen from './src/allScreens/ChatScreen';
 import ChatEmulatorScreen from './src/allScreens/ChatEmulatorScreen';
+import ProfileScreen from './src/allScreens/ProfileScreen';
+import BioScreen from './src/allScreens/BioScreen';
 
 // VoiceScreen
 import VoiceScreen from './src/allScreens/screens/VoiceScreen';
 
-import ModalComponent from './src/allScreens/components/ModalComponent';
+import ModalComponent from './src/components/ModalComponent';
 
 
 import { jwtDecode } from 'jwt-decode';
@@ -72,7 +74,6 @@ function CustomDrawerContent(props) {
   }, [deleteVisible]);
 
   return (
-
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
         {/* Search input */}
@@ -98,8 +99,6 @@ function CustomDrawerContent(props) {
             if (!animatedValues[screen.name]) {
               animatedValues[screen.name] = new Animated.Value(0);
             }
-
-
             return (
               <TouchableWithoutFeedback onPress={() => setDeleteVisible(null)} key={index}>
                 <View style={{ overflow: 'hidden', marginVertical: 4, }}>
@@ -182,15 +181,15 @@ function CustomDrawerContent(props) {
         justifyContent: 'flex-start',
       }}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('ChatScreen')}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
+          onPress={() => navigation.navigate('ProfileScreen')}
+          style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
         >
           <Image
             source={require('./src/assets/logo.png')}
             style={{ width: 50, height: 50, marginHorizontal: 8 }}
             resizeMode="contain"
           />
-          <Text style={{ fontSize: 16, fontWeight: '500' }}>Login</Text>
+          <Text style={{ fontSize: 16, fontWeight: '500' }}>Full Name</Text>
         </TouchableOpacity>
       </View>
       <ModalComponent
@@ -242,6 +241,9 @@ export default function App() {
         <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
         <Stack.Screen name="MainApp" component={SidebarNavigator} />
         <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
+
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        <Stack.Screen name="BioScreen" component={BioScreen} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>
