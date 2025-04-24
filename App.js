@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
-import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
 import Toast from 'react-native-toast-message';
@@ -11,18 +10,18 @@ import Toast from 'react-native-toast-message';
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
 import HomeScreen from './src/allScreens/HomeScreen';
 import ChatScreen from './src/allScreens/ChatScreen';
-import ChatEmulatorScreen from './src/allScreens/ChatEmulatorScreen';
+import ProfileScreen from './src/allScreens/ProfileScreen';
+import BioScreen from './src/allScreens/BioScreen';
+import VoiceScreen from './src/allScreens/VoiceScreen';
 
-// VoiceScreen
-import VoiceScreen from './src/allScreens/screens/VoiceScreen';
+
+import ModalComponent from './src/components/ModalComponent';
 
 
-import { jwtDecode } from 'jwt-decode';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
-
 const screens = [
   { name: 'Chào hỏi trợ giúp' },
   { name: 'Giải thích bài đọc hiểu' },
@@ -53,6 +52,22 @@ function CustomDrawerContent(props) {
   const filteredScreens = screens.filter(screen =>
     screen.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleDelete = () => {
+    // xử lý xoá ở đây
+    console.log('Confirmed delete!');
+    setIsModalVisible(false);
+  };
+  useEffect(() => {
+    Object.entries(animatedValues).forEach(([name, anim]) => {
+      Animated.timing(anim, {
+        toValue: deleteVisible === name ? -60 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [deleteVisible]);
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
@@ -80,17 +95,6 @@ function CustomDrawerContent(props) {
             if (!animatedValues[screen.name]) {
               animatedValues[screen.name] = new Animated.Value(0);
             }
-
-            useEffect(() => {
-              Object.entries(animatedValues).forEach(([name, anim]) => {
-                Animated.timing(anim, {
-                  toValue: deleteVisible === name ? -60 : 0,
-                  duration: 300,
-                  useNativeDriver: true,
-                }).start();
-              });
-            }, [deleteVisible]);
-
             return (
               <TouchableWithoutFeedback onPress={() => setDeleteVisible(null)} key={index}>
                 <View style={{ overflow: 'hidden', marginVertical: 4, }}>
@@ -128,7 +132,7 @@ function CustomDrawerContent(props) {
                     >
                       <View>
                         <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#212121' }}>{screen.name}</Text>
-                        <Text style={{ fontSize: 12,color: '#616161' }}>29 Dec 2023 - 09:41 AM</Text>
+                        <Text style={{ fontSize: 12, color: '#616161' }}>29 Dec 2023 - 09:41 AM</Text>
                       </View>
                       {isFocused ? (<View style={{ width: 12, height: 12, backgroundColor: '#00FF09', borderRadius: 12 }} ></View>)
                         : (<Ionicons name="chevron-forward" size={18} color="#888" />)}
@@ -148,8 +152,8 @@ function CustomDrawerContent(props) {
                     >
                       <TouchableOpacity
                         onPress={() => {
-                          console.log('Delete', screen.name);
                           setDeleteVisible(null);
+                          setIsModalVisible(true);
                         }}
                       >
                         <Ionicons name="trash-outline" size={18} color="white" />
@@ -160,8 +164,6 @@ function CustomDrawerContent(props) {
               </TouchableWithoutFeedback>
             );
           })}
-
-
         </ScrollView>
       </View>
 
@@ -175,17 +177,22 @@ function CustomDrawerContent(props) {
         justifyContent: 'flex-start',
       }}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('ChatScreen')}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
+          onPress={() => navigation.navigate('ProfileScreen')}
+          style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
         >
           <Image
             source={require('./src/assets/logo.png')}
             style={{ width: 50, height: 50, marginHorizontal: 8 }}
             resizeMode="contain"
           />
-          <Text style={{ fontSize: 16, fontWeight: '500' }}>Login</Text>
+          <Text style={{ fontSize: 16, fontWeight: '500' }}>Full Name</Text>
         </TouchableOpacity>
       </View>
+      <ModalComponent
+        visible={isModalVisible}
+        onConfirm={handleDelete}
+        onCancel={() => setIsModalVisible(false)}
+      />
     </DrawerContentScrollView>
   );
 }
@@ -230,6 +237,9 @@ export default function App() {
         <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
         <Stack.Screen name="MainApp" component={SidebarNavigator} />
         <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
+
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        <Stack.Screen name="BioScreen" component={BioScreen} />
       </Stack.Navigator>
       <Toast />
     </NavigationContainer>
