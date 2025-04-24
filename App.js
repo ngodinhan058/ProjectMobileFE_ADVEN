@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
-import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
 import Toast from 'react-native-toast-message';
@@ -14,14 +13,12 @@ import ChatScreen from './src/allScreens/ChatScreen';
 import ChatEmulatorScreen from './src/allScreens/ChatEmulatorScreen';
 import ProfileScreen from './src/allScreens/ProfileScreen';
 import BioScreen from './src/allScreens/BioScreen';
+import VoiceScreen from './src/allScreens/VoiceScreen';
 
-// VoiceScreen
-import VoiceScreen from './src/allScreens/screens/VoiceScreen';
 
 import ModalComponent from './src/components/ModalComponent';
 
 
-import { jwtDecode } from 'jwt-decode';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 
 const Drawer = createDrawerNavigator();

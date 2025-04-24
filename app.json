@@ -1,9 +1,10 @@
 {
   "expo": {
-    "name": "ProjectMobile",
+    "name": "Speak EZ",
     "slug": "project-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./src/assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
@@ -17,14 +18,17 @@
         "backgroundColor": "#000000"
       },
       "permissions": [
-        "INTERNET",
-        "ACCESS_NETWORK_STATE",
         "RECORD_AUDIO"
       ],
-      "package": "com.anonymous.projectmobile"
+      "package": "com.projectmobile.speakez"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "83c61440-2a9e-4f8e-b213-558138d6ce9e"
+      }
     }
   }
 }
