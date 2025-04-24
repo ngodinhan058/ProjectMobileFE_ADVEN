@@ -5,6 +5,7 @@ import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/
 import { Ionicons } from '@expo/vector-icons';
 
 import Toast from 'react-native-toast-message';
+import { StatusBar } from 'react-native';
 
 // All Home Screen
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
@@ -26,19 +27,6 @@ const screens = [
   { name: 'Chào hỏi trợ giúp' },
   { name: 'Giải thích bài đọc hiểu' },
   { name: 'Cấu hình Android SDK' },
-  { name: 'Gửi văn bản cho GPT' },
-  { name: 'Chào hỏi trợ giúp1' },
-  { name: 'Giải thích bài đọc hiểu2' },
-  { name: 'Cấu hình Android SDK3' },
-  { name: 'Gửi văn bản cho GPT4' },
-  { name: 'Chào hỏi trợ giúp16' },
-  { name: 'Giải thích bài đọc hiểu25' },
-  { name: 'Cấu hình Andro6id SDK3' },
-  { name: 'Gửi văn bản cho56 GPT4' },
-  { name: 'Chào hỏi trợ5 giúp1' },
-  { name: 'Giải thích 6bài đọc hiểu2' },
-  { name: 'Cấu hình A6ndroid SDK3' },
-  { name: 'Gửi văn bả6n cho GPT4' },
 ];
 
 function CustomDrawerContent(props) {
@@ -230,21 +218,30 @@ function AllHomeScreen() {
     </Stack.Navigator>
   );
 }
+
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
-        <Stack.Screen name="MainApp" component={SidebarNavigator} />
-        <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
+    <>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
 
-        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-        <Stack.Screen name="BioScreen" component={BioScreen} />
-      </Stack.Navigator>
-      <Toast />
-    </NavigationContainer>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+          <Stack.Screen name="MainApp" component={SidebarNavigator} />
+          <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+          <Stack.Screen name="BioScreen" component={BioScreen} />
+        </Stack.Navigator>
+        <Toast />
+      </NavigationContainer>
+    </>
   );
 }
+
 
 
 

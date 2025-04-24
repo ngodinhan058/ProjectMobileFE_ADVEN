@@ -37,11 +37,13 @@ const LoadingScreen = () => {
     checkConnection();
   }, []);
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../../assets/logo.png')}
-        style={{ width: 150, height: 150, }}
-      />
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <View style={styles.container}>
+        <Image
+          source={require('../../assets/logo.png')}
+          style={{ width: 150, height: 150, }}
+        />
+      </View>
       <Text style={styles.text}>Speak EZ</Text>
       <BallIndicator color='#6972F0' size={50} />
     </View>
@@ -50,14 +52,15 @@ const LoadingScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: "center",
-    marginTop: "50%"
+    marginTop: "50%",
+
   },
   text: {
     fontSize: 40,
     paddingTop: 50,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    textAlign: 'center'
   }
 
 
