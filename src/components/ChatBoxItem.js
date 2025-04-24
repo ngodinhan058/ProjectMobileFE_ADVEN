@@ -19,9 +19,10 @@ import { BlurView } from 'expo-blur'
 import axios from 'axios';
 import * as Speech from 'expo-speech';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { BE_URL } from '../allScreens/api/config';
 
 
-const ChatBox = ({ headerTitle, onVoicePress, openDrawer }) => {  
+const ChatBox = ({ headerTitle, onVoicePress, openDrawer }) => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -76,19 +77,19 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer }) => {
     setAIAnswer(true);
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `token`, // Thay YOUR_ACCESS_TOKEN bằng token thực tế của bạn
+      'Authorization': `token`,
     };
     try {
-      const response = await axios.post('https://b59f-2405-4802-8151-df90-e815-a59f-5fd0-ee7e.ngrok-free.app/questions/3', {
-        content: inputText.trim(), // Truyền tin nhắn từ người dùng
+      const response = await axios.post(BE_URL, {
+        content: inputText.trim(),
       }, {
-        headers: headers, // Thêm headers vào request
+        headers: headers,
       });
 
       // Xử lý phản hồi từ API
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        text: response.data.content, // Lấy dữ liệu phản hồi từ API
+        text: response.data.content,
         isSender: false,
       };
       setMessages(prev => [...prev, aiMessage]);
