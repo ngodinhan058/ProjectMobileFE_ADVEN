@@ -10,7 +10,6 @@ import Toast from 'react-native-toast-message';
 import LoadingScreen from './src/allScreens/screens/LoadingScreen';
 import HomeScreen from './src/allScreens/HomeScreen';
 import ChatScreen from './src/allScreens/ChatScreen';
-import ChatEmulatorScreen from './src/allScreens/ChatEmulatorScreen';
 import ProfileScreen from './src/allScreens/ProfileScreen';
 import BioScreen from './src/allScreens/BioScreen';
 import VoiceScreen from './src/allScreens/VoiceScreen';
