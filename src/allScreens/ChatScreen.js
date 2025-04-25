@@ -2,12 +2,16 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
 import { BackHandler, ToastAndroid, Platform } from 'react-native';
 import ChatBoxItem from '../components/ChatBoxItem';
+import { useRoute } from '@react-navigation/native';
 
-const ChatScreen = ({ title }) => {
+const ChatScreen = () => {
+  const route = useRoute();
+  const { chatId, title } = route.params;
+  
   const backPressCount = useRef(0);
   const timeoutRef = useRef(null);
   const navigation = useNavigation();
-
+  
   useFocusEffect(
     React.useCallback(() => {
       const handleBackPress = () => {
@@ -42,6 +46,7 @@ const ChatScreen = ({ title }) => {
   return (
     <ChatBoxItem
       headerTitle={title}
+      chatId={chatId}
       onVoicePress={() => navigation.navigate('VoiceScreen')}
       openDrawer={() => navigation.openDrawer()}
     />

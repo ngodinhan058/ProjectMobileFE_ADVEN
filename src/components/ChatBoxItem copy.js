@@ -70,7 +70,7 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
       ]);
 
       const combined = combineMessages(questionsRes.data, answersRes.data);
-
+      
       setMessages(combined);
     } catch (err) {
       console.error("Error fetching questions or answers:", err.response?.data || err.message);
@@ -202,66 +202,63 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
 
     return (
       <>
-        <TouchableWithoutFeedback
-          onPress={Keyboard.dismiss}
+        <View
+          style={[
+            styles.messageContainer,
+            item.isSender ? styles.sender : styles.receiver,
+          ]}
+          ref={messageRef}
         >
-          <View
-            style={[
-              styles.messageContainer,
-              item.isSender ? styles.sender : styles.receiver,
-            ]}
-            ref={messageRef}
+          <TouchableOpacity
+            onPressIn={() => pressTimerRef.current = setTimeout(handleLongPress, 300)}
+            onPressOut={() => clearTimeout(pressTimerRef.current)}
           >
-            <TouchableOpacity
-              onPressIn={() => pressTimerRef.current = setTimeout(handleLongPress, 300)}
-              onPressOut={() => clearTimeout(pressTimerRef.current)}
-            >
-              <Text style={item.isSender ? styles.messageTextSender : styles.messageText}>
-                {item.text}
-              </Text>
-            </TouchableOpacity>
-            {!item.isSender && (
-              <>
-                <TouchableOpacity
-                  onPress={() => copyToClipboard(item.text)}
-                  style={styles.copyText}
-                >
-                  <Image source={require('../assets/copy.png')} style={{ width: 16, height: 18 }} />
+            <Text style={item.isSender ? styles.messageTextSender : styles.messageText}>
+              {item.text}
+            </Text>
+          </TouchableOpacity>
+          {!item.isSender && (
+            <>
+              <TouchableOpacity
+                onPress={() => copyToClipboard(item.text)}
+                style={styles.copyText}
+              >
+                <Image source={require('../assets/copy.png')} style={{ width: 16, height: 18 }} />
 
+
+              </TouchableOpacity>
+              {AISpeaking ? (
+                <TouchableOpacity
+                  onPress={() => stopSpeaking()}
+                  style={styles.micText}
+                >
+
+                  <Ionicons
+                    name="mic-off-circle-outline"
+                    size={22}
+                    color="#2b3356"
+                  />
+
+                </TouchableOpacity>) :
+                (<TouchableOpacity
+                  onPress={() => speakText(item.text)}
+                  style={styles.micText}
+                >
+
+                  <Ionicons
+                    name="mic-circle-outline"
+                    size={22}
+                    color="#2b3356"
+                  />
 
                 </TouchableOpacity>
-                {AISpeaking ? (
-                  <TouchableOpacity
-                    onPress={() => stopSpeaking()}
-                    style={styles.micText}
-                  >
+                )}
+            </>
+          )
+          }
 
-                    <Ionicons
-                      name="mic-off-circle-outline"
-                      size={22}
-                      color="#2b3356"
-                    />
+        </View >
 
-                  </TouchableOpacity>) :
-                  (<TouchableOpacity
-                    onPress={() => speakText(item.text)}
-                    style={styles.micText}
-                  >
-
-                    <Ionicons
-                      name="mic-circle-outline"
-                      size={22}
-                      color="#2b3356"
-                    />
-
-                  </TouchableOpacity>
-                  )}
-              </>
-            )
-            }
-
-          </View >
-        </TouchableWithoutFeedback>
       </>
 
     );
@@ -280,79 +277,81 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
         searchInputRef.current.focus();
       }
     }, 100);
-  }, []);
+  }, []);  
   return (
     <>
-      <View style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={openDrawer}>
-              <Icon name="list-outline" size={28} color="#000" style={styles.logoIcon} />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "New Chat"}</Text>
-          </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.container}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={openDrawer}>
+                <Icon name="list-outline" size={28} color="#000" style={styles.logoIcon} />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "New Chat"}</Text>
+            </View>
 
-          <View style={{ maxHeight: '100%', marginBottom: aiAnswer ? 80 : 36, }}>
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              renderItem={renderMessage}
-              keyExtractor={(item) => item.id.toString()}
-              showsVerticalScrollIndicator={false}
-            />
-            {aiAnswer && (
-              <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
-                <DotIndicator color='#000' size={8} count={3} />
-              </View>
-            )}
-            {error && (
-              <View style={styles.error}>
-                <Text style={styles.errorText}>Đã xảy ra lỗi khi tải dữ liệu.</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={isFocused ? styles.inputFocused : styles.input}
-            placeholder="Nhập tin nhắn..."
-            value={inputText}
-            onChangeText={(text) => {
-              setInputText(text);
-              setIsInputEmpty(text.trim().length === 0);
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            ref={searchInputRef}
-          />
-
-          {aiAnswer ? (
-            <TouchableOpacity onPress={stopAI}>
-              <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
-                <View style={styles.innerStopButton}>
-                  <Image source={require('../assets/stop.png')} style={{ width: 18, height: 18 }} />
+            <View style={{ maxHeight: '100%', marginBottom: aiAnswer ? 80 : 36, }}>
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                renderItem={renderMessage}
+                keyExtractor={(item) => item.id.toString()}
+                showsVerticalScrollIndicator={false}
+              />
+              {aiAnswer && (
+                <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
+                  <DotIndicator color='#000' size={8} count={3} />
                 </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          ) : (
-            isInputEmpty ? (
-              <TouchableOpacity style={styles.sendButton} onPress={onVoicePress}>
-                <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                  <Icon name="barcode-outline" size={23} color={'#fff'} />
+              )}
+              {error && (
+                <View style={styles.error}>
+                  <Text style={styles.errorText}>Đã xảy ra lỗi khi tải dữ liệu.</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={isFocused ? styles.inputFocused : styles.input}
+              placeholder="Nhập tin nhắn..."
+              value={inputText}
+              onChangeText={(text) => {
+                setInputText(text);
+                setIsInputEmpty(text.trim().length === 0);
+              }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              ref={searchInputRef}
+            />
+
+            {aiAnswer ? (
+              <TouchableOpacity onPress={stopAI}>
+                <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
+                  <View style={styles.innerStopButton}>
+                    <Image source={require('../assets/stop.png')} style={{ width: 18, height: 18 }} />
+                  </View>
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                  <Image source={require('../assets/send.png')} style={{ width: 18, height: 18 }} />
-                </LinearGradient>
-              </TouchableOpacity>
-            )
-          )}
-        </View>
+              isInputEmpty ? (
+                <TouchableOpacity style={styles.sendButton} onPress={onVoicePress}>
+                  <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
+                    <Icon name="barcode-outline" size={23} color={'#fff'} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                  <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
+                    <Image source={require('../assets/send.png')} style={{ width: 18, height: 18 }} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              )
+            )}
+          </View>
 
-      </View>
+        </View>
+      </TouchableWithoutFeedback>
       {showCopyModal && (
         <BlurView intensity={50} tint="light" style={styles.blurOverlay}>
           <TouchableOpacity
@@ -472,13 +471,13 @@ const styles = StyleSheet.create({
   },
   copyText: {
     position: 'absolute',
-    top: 10,
+    top: 15,
     right: -30,
   },
   micText: {
     position: 'absolute',
-    top: 30,
-    right: -33,
+    top: 40,
+    right: -32,
   },
   inputContainer: {
     position: 'relative',
