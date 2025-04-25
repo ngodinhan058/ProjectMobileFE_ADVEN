@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback,Keyboard } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,13 +38,11 @@ function CustomDrawerContent(props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteVisible, setDeleteVisible] = useState(null);
   const currentRoute = props.state.routeNames[props.state.index];
-  // const filteredScreens = chats.filter(chats =>
-  //   chats?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
+
   const filteredScreens = chats.filter(chat =>
-    chat.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    (chat.name || 'New Chat').toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
+
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleDelete = () => {
@@ -52,6 +50,7 @@ function CustomDrawerContent(props) {
     console.log('Confirmed delete!');
     setIsModalVisible(false);
   };
+
   useEffect(() => {
     Object.entries(animatedValues).forEach(([id, anim]) => {
       Animated.timing(anim, {
@@ -66,23 +65,37 @@ function CustomDrawerContent(props) {
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
         {/* Search input */}
-        <TextInput
-          placeholder="Tìm kiếm..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={{
+        <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
+          <View style={{
+            flex: 1,
             backgroundColor: '#f0f0f0',
-            borderRadius: 8,
+            borderRadius: 100,
             padding: 10,
-            marginBottom: 10,
+            justifyContent: 'center',
             fontSize: 16,
-          }}
-        />
+          }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <TextInput
+                placeholder="Tìm kiếm..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </TouchableWithoutFeedback>
+
+            <Ionicons name="search-outline" size={25} color="#2b3356" style={{ position: 'absolute', right: 15, }} />
+          </View>
+          <View>
+
+            <TouchableOpacity onPress={() => navigation.navigate(`ChatScreen`, { chatId: null })}>
+              <Ionicons name="duplicate-outline" size={25} color="#2b3356" style={{ paddingLeft: 10 }} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* Drawer items list scrolls naturally */}
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {filteredScreens.map((screen, index) => {
-            
+
             const isFocused = currentRoute === screen.id;
             const isDeleteMode = deleteVisible === screen.id;
 
@@ -242,7 +255,7 @@ function SidebarNavigator() {
           <Drawer.Screen
             key={chat.id}
             name={`Chat_${chat.id}`}
-            children={() => <ChatScreen title={chat.name} chatId={chat.id}/>}
+            children={() => <ChatScreen title={chat.name} chatId={chat.id} />}
           />
         ))}
 

@@ -20,9 +20,13 @@ import axios from 'axios';
 import * as Speech from 'expo-speech';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BE_URL, token } from '../allScreens/api/config';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-
-const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
+const ChatBox = ({openDrawer, headerTitle, onVoicePress}) => {
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { chatId  } = route.params;
+  const [chatNewId, setChatNewId] = useState(null);
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -73,7 +77,7 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
 
       setMessages(combined);
     } catch (err) {
-      console.error("Error fetching questions or answers:", err.response?.data || err.message);
+      // console.error("Error fetching questions or answers:", err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -165,6 +169,67 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
       setAIAnswer(false);
     }
   };
+
+  const sendNewMessage = async () => {
+    if (!inputText.trim()) return;
+
+    setIsInputEmpty(true);
+
+    const userMessage = {
+      id: Date.now().toString(),
+      text: inputText.trim(),
+      isSender: true,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputText('');
+    setAIAnswer(true);
+    setError(false);
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': token,
+    };
+
+    try {
+      let currentChatId = chatNewId;
+      if (!currentChatId) {
+        const responseNew = await axios.post(`${BE_URL}/chats`, {}, { headers });
+        if (responseNew.status === 201 && responseNew.data.new_chat_id) {
+          currentChatId = responseNew.data.new_chat_id;
+          setChatNewId(currentChatId);
+          navigation.setParams({ chatId: currentChatId });
+
+        } else {
+          Alert.alert('Không thể tạo cuộc trò chuyện mới');
+          setAIAnswer(false);
+          return;
+        }
+      }
+      // Gửi câu hỏi tới chat hiện tại
+      console.log("mess", "new " + currentChatId);
+
+      const response = await axios.post(
+        `${BE_URL}/questions/${currentChatId}`,
+        { content: userMessage.text },
+        { headers }
+      );
+
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        text: response.data.content,
+        isSender: false,
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setError(true);
+    } finally {
+      setAIAnswer(false);
+    }
+  };
+
 
   const stopAI = () => {
     if (timeoutRef.current) {
@@ -272,7 +337,14 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
-
+  useEffect(() => {
+    if (isFocused && !aiAnswer) {
+      // AI đã trả lời xong và input đang được focus
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100); // delay nhẹ để chắc chắn FlatList đã cập nhật
+    }
+  }, [aiAnswer, isFocused]);
   const searchInputRef = useRef(null);
   useEffect(() => {
     setTimeout(() => {
@@ -292,7 +364,7 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
             <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "New Chat"}</Text>
           </View>
 
-          <View style={{ maxHeight: '100%', marginBottom: aiAnswer ? 80 : 36, }}>
+          <View style={{ flex: 1, marginBottom: aiAnswer ? "23%" : 36, }}>
             <FlatList
               ref={flatListRef}
               data={messages}
@@ -300,11 +372,13 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
               keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
             />
+            {/* Loading */}
             {aiAnswer && (
               <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
                 <DotIndicator color='#000' size={8} count={3} />
               </View>
             )}
+            {/* Error */}
             {error && (
               <View style={styles.error}>
                 <Text style={styles.errorText}>Đã xảy ra lỗi khi tải dữ liệu.</Text>
@@ -343,7 +417,7 @@ const ChatBox = ({ headerTitle, onVoicePress, openDrawer, chatId }) => {
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+              <TouchableOpacity style={styles.sendButton} onPress={chatId ? sendMessage : sendNewMessage}>
                 <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
                   <Image source={require('../assets/send.png')} style={{ width: 18, height: 18 }} />
                 </LinearGradient>
@@ -552,7 +626,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   errorText: {
-    color: '#b91c1c',           // đỏ đậm cho chữ
+    color: '#b91c1c',
     fontSize: 14,
     fontWeight: '500',
   },
