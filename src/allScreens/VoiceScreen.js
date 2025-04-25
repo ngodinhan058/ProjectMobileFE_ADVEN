@@ -1,11 +1,25 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { WebView_URL } from './api/config';
+import { WebView_URL, BE_URL, token } from './api/config';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const VoiceTest = ({ navigation, route }) => {
   const [webLoaded, setWebLoaded] = useState(false);
+  const webViewRef = useRef(null);
+  const { chatId } = route.params;
+  // 🔁 Gửi dữ liệu sang Web khi WebView load xong
+  useEffect(() => {
+    if (webLoaded && webViewRef.current) {
+      const payload = {
+        token: token,
+        id: chatId,
+        url: BE_URL
+      };
+
+      webViewRef.current.postMessage(JSON.stringify(payload));
+    }
+  }, [webLoaded]);
   return (
     <>
       <View style={{ flex: 1, }}>
@@ -20,6 +34,7 @@ const VoiceTest = ({ navigation, route }) => {
           </TouchableOpacity>
         )}
         <WebView
+          ref={webViewRef}
           source={{ uri: WebView_URL }} // chỉnh theo local bạn
           javaScriptEnabled={true}
           domStorageEnabled={true}

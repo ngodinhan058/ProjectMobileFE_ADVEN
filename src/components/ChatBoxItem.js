@@ -22,10 +22,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BE_URL, token } from '../allScreens/api/config';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const ChatBox = ({openDrawer, headerTitle, onVoicePress}) => {
+const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { chatId  } = route.params;
+  const { chatId } = route.params;
   const [chatNewId, setChatNewId] = useState(null);
 
   const [messages, setMessages] = useState([]);
@@ -363,8 +363,8 @@ const ChatBox = ({openDrawer, headerTitle, onVoicePress}) => {
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "New Chat"}</Text>
           </View>
-
-          <View style={{ flex: 1, marginBottom: aiAnswer ? "23%" : 36, }}>
+          {/* maxHeight: "100%", marginBottom: aiAnswer ? "23%" : 36, */}
+          <View style={{ flex: 1 }}>
             <FlatList
               ref={flatListRef}
               data={messages}

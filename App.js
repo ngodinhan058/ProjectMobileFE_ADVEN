@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback,Keyboard } from 'react-native';
+import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,7 +37,10 @@ function CustomDrawerContent(props) {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteVisible, setDeleteVisible] = useState(null);
-  const currentRoute = props.state.routeNames[props.state.index];
+  // const currentRoute = chats[0].id;
+  const currentRoute = props.state.routeNames[props.state.index]; // e.g., "chat-2"
+  const currentChatId = parseInt(currentRoute.replace("Chat_", ""));
+  // const currentRoute = props.state.routeNames[props.state.index];
 
   const filteredScreens = chats.filter(chat =>
     (chat.name || 'New Chat').toLowerCase().includes(searchQuery.toLowerCase())
@@ -96,7 +99,7 @@ function CustomDrawerContent(props) {
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {filteredScreens.map((screen, index) => {
 
-            const isFocused = currentRoute === screen.id;
+            const isFocused = currentChatId === screen.id;
             const isDeleteMode = deleteVisible === screen.id;
 
             if (!animatedValues[screen.id]) {

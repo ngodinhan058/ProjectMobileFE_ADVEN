@@ -47,7 +47,7 @@ const ChatScreen = () => {
     <ChatBoxItem
       headerTitle={title}
       chatId={chatId || null}
-      onVoicePress={() => navigation.navigate('VoiceScreen')}
+      onVoicePress={() => navigation.navigate('VoiceScreen',{ chatId: chatId })}
       openDrawer={() => navigation.openDrawer()}
     />
   );
