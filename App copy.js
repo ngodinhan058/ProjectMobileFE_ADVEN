@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
-
-import { BE_URL, getToken } from './src/allScreens/api/config';
+import { BE_URL } from './src/allScreens/api/config';
 
 import Toast from 'react-native-toast-message';
 import { StatusBar } from 'react-native';
@@ -18,11 +16,6 @@ import ProfileScreen from './src/allScreens/ProfileScreen';
 import BioScreen from './src/allScreens/BioScreen';
 import VoiceScreen from './src/allScreens/VoiceScreen';
 
-// All Login Screen
-import LoginScreen from './src/allScreens/screens/login/LoginScreen';
-import InputLoginScreen from './src/allScreens/screens/login/InputLoginScreen';
-import SignUpScreen from './src/allScreens/screens/login/SignUpScreen';
-
 
 import ModalComponent from './src/components/ModalComponent';
 
@@ -32,25 +25,39 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@rea
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
+const [chats, setChats] = useState([]);
+const [loading, setLoading] = useState(true);
 
+const getChats = async () => {
+  try {
+    const response = await axios.get(`${BE_URL}/chats`, {
+      headers: {
+        Authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzU2Mjc2OTE5fQ.tmqe_AYBuefLV5yfti0zVf_qIKdF9JYgNoYQHv9kb1I',
+      },
+    });
+    setChats(response.data);
+  } catch (err) {
+    console.error('Error fetching chats:', err.response?.data || err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  getChats();
+}, []);
 
 function CustomDrawerContent(props) {
-  const { chats } = props;
-
   const navigation = useNavigation();
   const animatedValues = useRef({}).current;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteVisible, setDeleteVisible] = useState(null);
-  // const currentRoute = chats[0].id;
-  const currentRoute = props.state.routeNames[props.state.index]; // e.g., "chat-2"
-  const currentChatId = parseInt(currentRoute.replace("Chat_", ""));
-  // const currentRoute = props.state.routeNames[props.state.index];
+  const currentRoute = props.state.routeNames[props.state.index];
 
-  const filteredScreens = chats.filter(chat =>
-    (chat.name || 'New Chat').toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredScreens = chats.filter(chats =>
+    chats.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleDelete = () => {
@@ -58,11 +65,10 @@ function CustomDrawerContent(props) {
     console.log('Confirmed delete!');
     setIsModalVisible(false);
   };
-
   useEffect(() => {
-    Object.entries(animatedValues).forEach(([id, anim]) => {
+    Object.entries(animatedValues).forEach(([name, anim]) => {
       Animated.timing(anim, {
-        toValue: deleteVisible === parseInt(id) ? -60 : 0,
+        toValue: deleteVisible === name ? -60 : 0,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -73,51 +79,35 @@ function CustomDrawerContent(props) {
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
         {/* Search input */}
-        <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
-          <View style={{
-            flex: 1,
+        <TextInput
+          placeholder="Tìm kiếm..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={{
             backgroundColor: '#f0f0f0',
-            borderRadius: 100,
+            borderRadius: 8,
             padding: 10,
-            justifyContent: 'center',
+            marginBottom: 10,
             fontSize: 16,
-          }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <TextInput
-                placeholder="Tìm kiếm..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </TouchableWithoutFeedback>
-
-            <Ionicons name="search-outline" size={25} color="#2b3356" style={{ position: 'absolute', right: 15, }} />
-          </View>
-          <View>
-
-            <TouchableOpacity onPress={() => navigation.navigate(`ChatScreen`, { chatId: null })}>
-              <Ionicons name="duplicate-outline" size={25} color="#2b3356" style={{ paddingLeft: 10 }} />
-            </TouchableOpacity>
-          </View>
-        </View>
+          }}
+        />
 
         {/* Drawer items list scrolls naturally */}
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {filteredScreens.map((screen, index) => {
+            const isFocused = currentRoute === screen.name;
+            const isDeleteMode = deleteVisible === screen.name;
 
-            const isFocused = currentChatId === screen.id;
-            const isDeleteMode = deleteVisible === screen.id;
-
-            if (!animatedValues[screen.id]) {
-              animatedValues[screen.id] = new Animated.Value(0);
+            if (!animatedValues[screen.name]) {
+              animatedValues[screen.name] = new Animated.Value(0);
             }
             return (
               <TouchableWithoutFeedback onPress={() => setDeleteVisible(null)} key={index}>
-                <View style={{ overflow: 'hidden', marginVertical: 4 }}>
+                <View style={{ overflow: 'hidden', marginVertical: 4, }}>
                   <Animated.View
                     style={{
                       flexDirection: 'row',
-                      transform: [{ translateX: animatedValues[screen.id] }],
-
+                      transform: [{ translateX: animatedValues[screen.name] }],
                     }}
                   >
                     {/* Drawer item */}
@@ -126,12 +116,12 @@ function CustomDrawerContent(props) {
                         if (isDeleteMode) {
                           setDeleteVisible(null);
                         } else {
-                          props.navigation.navigate(`Chat_${screen.id}`, { title: screen.name, chatId: screen.id });
+                          props.navigation.navigate(screen.name);
                           setSearchQuery('');
                           setDeleteVisible(null);
                         }
                       }}
-                      onLongPress={() => setDeleteVisible(screen.id)}
+                      onLongPress={() => setDeleteVisible(screen.name)}
                       delayLongPress={300}
                       style={{
                         width: "100%",
@@ -140,52 +130,47 @@ function CustomDrawerContent(props) {
                         justifyContent: 'space-between',
                         backgroundColor: '#fafafa',
                         borderRadius: 8,
-                        borderTopRightRadius: isDeleteMode ? 0 : 8,
-                        borderBottomRightRadius: isDeleteMode ? 0 : 8,
+                        borderTopRightRadius: deleteVisible == screen.name ? 0 : 8,
+                        borderBottomRightRadius: deleteVisible == screen.name ? 0 : 8,
                         paddingVertical: 18,
                         paddingHorizontal: 12,
                       }}
                     >
                       <View>
-                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#212121' }}>{`${screen.name ? screen.name : "New Chat"}`}</Text>
-                        <Text style={{ fontSize: 12, color: '#616161' }}>{new Date(screen.time).toLocaleString()}</Text>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#212121' }}>{screen.name}</Text>
+                        <Text style={{ fontSize: 12, color: '#616161' }}>29 Dec 2023 - 09:41 AM</Text>
                       </View>
-                      {isFocused ? (
-                        <View style={{ width: 12, height: 12, backgroundColor: '#00FF09', borderRadius: 12 }} />
-                      ) : (
-                        <Ionicons name="chevron-forward" size={18} color="#888" />
-                      )}
+                      {isFocused ? (<View style={{ width: 12, height: 12, backgroundColor: '#00FF09', borderRadius: 12 }} ></View>)
+                        : (<Ionicons name="chevron-forward" size={18} color="#888" />)}
+
                     </TouchableOpacity>
 
                     {/* Trash button */}
-                    {isDeleteMode && (
-                      <View
-                        style={{
-                          width: 60,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderTopRightRadius: 8,
-                          borderBottomRightRadius: 8,
-                          backgroundColor: "red"
+                    <View
+                      style={{
+                        width: 60,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderTopRightRadius: 8,
+                        borderBottomRightRadius: 8,
+                        backgroundColor: "red"
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          setDeleteVisible(null);
+                          setIsModalVisible(true);
                         }}
                       >
-                        <TouchableOpacity
-                          onPress={() => {
-                            setDeleteVisible(null);
-                            setIsModalVisible(true);
-                          }}
-                        >
-                          <Ionicons name="trash-outline" size={18} color="white" />
-                        </TouchableOpacity>
-                      </View>
-                    )}
+                        <Ionicons name="trash-outline" size={18} color="white" />
+                      </TouchableOpacity>
+                    </View>
                   </Animated.View>
                 </View>
               </TouchableWithoutFeedback>
             );
           })}
         </ScrollView>
-
       </View>
 
       {/* Fixed login at bottom */}
@@ -220,55 +205,24 @@ function CustomDrawerContent(props) {
 
 
 function SidebarNavigator() {
-  const [chats, setChats] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const getChats = async () => {
-    const token = await getToken();
-
-    try {
-      const response = await axios.get(`${BE_URL}/chats`, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      setChats(response.data);
-
-    } catch (err) {
-      // console.error('Error fetching chats:', err.response?.data || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getChats();
-  }, []);
-
-  // if (loading) {
-  //   return null;
-  // }
-
-
   return (
     <>
       <Drawer.Navigator
         initialRouteName="AllHomeScreen"
         screenOptions={{ headerShown: false }}
-        drawerContent={props => <CustomDrawerContent {...props} chats={chats} />}
+        drawerContent={props => <CustomDrawerContent {...props} />}
       >
         <Drawer.Screen
           name={"AllHomeScreen"}
           component={AllHomeScreen}
         />
-        {chats.map((chat) => (
+        {chats.map((chats) => (
           <Drawer.Screen
-            key={chat.id}
-            name={`Chat_${chat.id}`}
-            children={() => <ChatScreen title={chat.name} chatId={chat.id} />}
+            key={chats.id}
+            name={chats.id}
+            children={() => <ChatScreen title={chats.id} />}
           />
         ))}
-
       </Drawer.Navigator>
 
     </>
@@ -299,11 +253,7 @@ export default function App() {
           <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="BioScreen" component={BioScreen} />
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="InputLoginScreen" component={InputLoginScreen} />
-          <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
         </Stack.Navigator>
-        {/* <AllLoginScreen /> */}
         <Toast />
       </NavigationContainer>
     </>

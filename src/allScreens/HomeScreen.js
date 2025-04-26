@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, } from 'react-native';
+import { View, Text, Alert, Image, StyleSheet, TouchableOpacity, } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 
-const HomeScreen = ({ title }) => {
+
+const HomeScreen = () => {
   const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image source={require('../assets/logo.png')} style={styles.logoIcon} />
-        <Text style={styles.headerTitle}>{title}</Text>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Image source={require('../assets/logo.png')} style={styles.logoIcon} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Speak EZ</Text>
       </View>
       <View style={{ alignItems: 'center' }}>
         <Image source={require('../assets/logo.png')} style={styles.mainImage} />
@@ -18,7 +21,7 @@ const HomeScreen = ({ title }) => {
         <Text style={styles.description}>
           Bắt đầu trò chuyện với AI ngay bây giờ. {"\n"}Bạn có thể hỏi tôi bất cứ điều gì.
         </Text>
-        <TouchableOpacity onPress={() => navigation.replace('ChatScreen')} style={styles.shadow}>
+        <TouchableOpacity onPress={() =>  navigation.navigate(`ChatScreen`, { chatId: null })} style={styles.shadow}>
           <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.gradientButton}>
             <Text style={styles.buttonText}>Bắt Đầu Trò Chuyện</Text>
           </LinearGradient>

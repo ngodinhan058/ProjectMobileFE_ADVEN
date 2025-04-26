@@ -6,6 +6,7 @@ import { LogBox } from 'react-native';
 import * as Network from 'expo-network';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { BE_URL, getToken } from '../api/config';
 
 const LoadingScreen = () => {
   const navigation = useNavigation();
@@ -17,13 +18,21 @@ const LoadingScreen = () => {
   }, []);
   useEffect(() => {
     const checkConnection = async () => {
+      const token = await getToken();
       const status = await Network.getNetworkStateAsync();
       setIsConnected(status.isConnected);
 
       if (status.isConnected) {
-        setTimeout(() => {
-          navigation.replace('MainApp');
-        }, 1500);
+        if (token) {
+          setTimeout(() => {
+            navigation.replace('MainApp');
+          }, 1500);
+        }
+        else {
+          setTimeout(() => {
+            navigation.replace('LoginScreen');
+          }, 1500);
+        }
       } else {
         Toast.show({
           type: 'error',
