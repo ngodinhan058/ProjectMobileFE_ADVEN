@@ -19,7 +19,7 @@ import { BlurView } from 'expo-blur'
 import axios from 'axios';
 import * as Speech from 'expo-speech';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { BE_URL, token } from '../allScreens/api/config';
+import { BE_URL, getToken } from '../allScreens/api/config';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
@@ -56,7 +56,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
 
 
   const getChatContent = async (chatId) => {
-
+    const token = await getToken();
     try {
       setLoading(true);
 
@@ -130,6 +130,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
     setAISpeaking(false);
   };
   const sendMessage = async () => {
+    const token = await getToken();
     if (!inputText.trim()) return;
     setIsInputEmpty(true)
     const userMessage = {
@@ -171,6 +172,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
   };
 
   const sendNewMessage = async () => {
+    const token = await getToken();
     if (!inputText.trim()) return;
 
     setIsInputEmpty(true);

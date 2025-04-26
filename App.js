@@ -5,7 +5,7 @@ import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
-import { BE_URL, token } from './src/allScreens/api/config';
+import { BE_URL, getToken } from './src/allScreens/api/config';
 
 import Toast from 'react-native-toast-message';
 import { StatusBar } from 'react-native';
@@ -17,6 +17,11 @@ import ChatScreen from './src/allScreens/ChatScreen';
 import ProfileScreen from './src/allScreens/ProfileScreen';
 import BioScreen from './src/allScreens/BioScreen';
 import VoiceScreen from './src/allScreens/VoiceScreen';
+
+// All Login Screen
+import LoginScreen from './src/allScreens/screens/login/LoginScreen';
+import InputLoginScreen from './src/allScreens/screens/login/InputLoginScreen';
+import SignUpScreen from './src/allScreens/screens/login/SignUpScreen';
 
 
 import ModalComponent from './src/components/ModalComponent';
@@ -219,6 +224,8 @@ function SidebarNavigator() {
   const [loading, setLoading] = useState(true);
 
   const getChats = async () => {
+    const token = await getToken();
+
     try {
       const response = await axios.get(`${BE_URL}/chats`, {
         headers: {
@@ -228,7 +235,7 @@ function SidebarNavigator() {
       setChats(response.data);
 
     } catch (err) {
-      console.error('Error fetching chats:', err.response?.data || err.message);
+      // console.error('Error fetching chats:', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -292,7 +299,11 @@ export default function App() {
           <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="BioScreen" component={BioScreen} />
+          <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen name="InputLoginScreen" component={InputLoginScreen} />
+          <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
         </Stack.Navigator>
+        {/* <AllLoginScreen /> */}
         <Toast />
       </NavigationContainer>
     </>

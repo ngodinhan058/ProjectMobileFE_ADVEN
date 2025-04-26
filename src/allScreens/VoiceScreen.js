@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const VoiceTest = ({ navigation, route }) => {
   const [webLoaded, setWebLoaded] = useState(false);
+  const [changeWeb, setchangeWeb] = useState(false);
   const webViewRef = useRef(null);
   const { chatId } = route.params;
   // 🔁 Gửi dữ liệu sang Web khi WebView load xong
@@ -20,6 +21,13 @@ const VoiceTest = ({ navigation, route }) => {
       webViewRef.current.postMessage(JSON.stringify(payload));
     }
   }, [webLoaded]);
+  useEffect(() => {
+    setTimeout(() => {
+      setchangeWeb(true)
+      console.log(changeWeb);
+      
+    }, 3000);
+  }, []);
   return (
     <>
       <View style={{ flex: 1, }}>
@@ -33,7 +41,7 @@ const VoiceTest = ({ navigation, route }) => {
             <Icon name="close" size={24} color="#2b3356" style={styles.logoIcon} />
           </TouchableOpacity>
         )}
-        <WebView
+        {changeWeb ? (<WebView
           ref={webViewRef}
           source={{ uri: WebView_URL }} // chỉnh theo local bạn
           javaScriptEnabled={true}
@@ -57,7 +65,12 @@ const VoiceTest = ({ navigation, route }) => {
               console.warn("Không parse được message từ WebView", e);
             }
           }}
-        />
+        />)
+         : (<WebView
+          source={{ uri: BE_URL }} // chỉnh theo local bạn
+          
+        />) }
+        
       </View>
     </>
   );

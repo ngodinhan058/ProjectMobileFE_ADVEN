@@ -2,14 +2,18 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { Video } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Import video từ thư mục nội bộ
 import videoBg from "../../../assets/video.mp4";  // Đường dẫn đúng vào thư mục assets
+import { useNavigation } from '@react-navigation/native';
+
 
 // Lấy kích thước màn hình để căn chỉnh video
 const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       {/* Video nền */}
@@ -34,21 +38,16 @@ const LoginScreen = () => {
           SpeakEZ AI <Text style={styles.emoji}>👋</Text>
         </Text>
 
-        <TouchableOpacity style={styles.buttonPrimary}>
-          <Text style={styles.buttonText}>Log in</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("InputLoginScreen")}>
+          <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.gradientButton}>
+            <Text style={styles.buttonText}>Đăng Nhập</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSecondary}>
-          <Text style={styles.buttonSecondaryText}>Sign up</Text>
+        <TouchableOpacity style={styles.buttonSecondary} onPress={() => navigation.navigate("SignUpScreen")}>
+          <Text style={styles.buttonSecondaryText}>Đăng Ký</Text>
         </TouchableOpacity>
 
-        <Text style={styles.orText}>or continue with</Text>
-
-        <View style={styles.socialContainer}>
-          <FontAwesome name="google" size={32} color="#DB4437" style={styles.icon} />
-          <FontAwesome name="apple" size={32} color="#000" style={styles.icon} />
-          <FontAwesome name="facebook" size={32} color="#1877F2" style={styles.icon} />
-        </View>
       </View>
     </View>
   );
@@ -73,26 +72,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
   },
   appName: {
-    fontSize: 28,
+    fontSize: 34,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 30,
   },
   emoji: {
-    fontSize: 28,
+    fontSize: 34,
   },
-  buttonPrimary: {
-    backgroundColor: "#6C63FF",
-    paddingVertical: 12,
-    paddingHorizontal: 80,
+  gradientButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 130,
     borderRadius: 30,
-    marginBottom: 15,
+    marginVertical: 20,
   },
+  
   buttonText: {
     color: "#fff",
     fontSize: 16,
@@ -102,7 +101,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#fff",
     paddingVertical: 12,
-    paddingHorizontal: 80,
+    paddingHorizontal: 140,
     borderRadius: 30,
     marginBottom: 20,
   },
@@ -110,19 +109,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  orText: {
-    fontSize: 14,
-    color: "#fff",
-    marginBottom: 10,
-  },
-  socialContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "60%",
-  },
-  icon: {
-    marginHorizontal: 10,
   },
 });
 
