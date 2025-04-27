@@ -7,7 +7,8 @@ Xong chạy "npm start", đợi 1 lúc sẽ có sẽ có mã QR giống v
 Điện Thoại:
 Trên đt lên chplay tải expo về
 xong quét mã là đc
-![image](https://github.com/user-attachments/assets/983e33a4-9f75-4a18-9cf0-e87e0a665dfe)
+![image](https://github.com/user-attachments/assets/ea4556fc-c216-44ce-afc6-d1ccf744f630)
+
 
 Lưu ý: cả 2 máy phải kết nối 1 mạng 
 
