@@ -50,21 +50,21 @@ export default function SummaryScreen({ route, navigation }) {
 
   const pieData = [
     {
-      name: 'Fluency',
+      name: 'Độ trôi chảy',
       population: result.fluency,
       color: 'rgba(255, 99, 132, 1)',
       legendFontColor: '#7F7F7F',
       legendFontSize: 15,
     },
     {
-      name: 'Grammar',
+      name: 'Ngữ pháp',
       population: result.grammar,
       color: 'rgba(54, 162, 235, 1)',
       legendFontColor: '#7F7F7F',
       legendFontSize: 15,
     },
     {
-      name: 'Vocabulary',
+      name: 'Từ vựng',
       population: result.vocab,
       color: 'rgba(255, 206, 86, 1)',
       legendFontColor: '#7F7F7F',
@@ -108,10 +108,20 @@ export default function SummaryScreen({ route, navigation }) {
       </View>
       {/* Card thông tin */}
       <View style={{ backgroundColor: 'white', borderRadius: 20, padding: 20, marginBottom: 20, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 }}>
-        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>📚 Chủ đề: <Text style={{ fontWeight: '400' }}>{result.topic}</Text></Text>
-        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>⏱️ Thời gian: <Text style={{ fontWeight: '400' }}>{result.duration} phút</Text></Text>
-        <Text style={{ fontSize: 18, fontWeight: '600' }}>🔄 Lượt trao đổi: <Text style={{ fontWeight: '400' }}>{result.total_turns}</Text></Text>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>
+          📚 Chủ đề: <Text style={{ fontWeight: '400' }}>{result.topic}</Text>
+        </Text>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>
+          ⏱️ Thời gian: <Text style={{ fontWeight: '400' }}>{result.duration} phút</Text>
+        </Text>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>
+          🔄 Lượt trao đổi: <Text style={{ fontWeight: '400' }}>{result.total_turns}</Text>
+        </Text>
+        <Text style={{ fontSize: 18, fontWeight: '600' }}>
+          ⚡ Tốc độ phản hồi: <Text style={{ fontWeight: '400' }}>{result.response_time.toFixed(2)} giây</Text>
+        </Text>
       </View>
+
 
       {/* Card feedback */}
       <View style={{ backgroundColor: 'white', borderRadius: 20, padding: 20, marginBottom: 30, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 }}>
@@ -122,7 +132,7 @@ export default function SummaryScreen({ route, navigation }) {
       </View>
 
 
-      <TouchableOpacity onPress={() => navigation.navigate()} style={{
+      <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')} style={{
         borderRadius: 30,
         shadowColor: '#000',
         shadowOffset: {
