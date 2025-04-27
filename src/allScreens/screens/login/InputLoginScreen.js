@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  CheckBox,
+  ScrollView,
   Alert,
   Image,
 } from "react-native";
@@ -29,15 +29,16 @@ const InputLoginScreen = () => {
       Alert.alert('Lỗi', 'Vui lòng nhập email và mật khẩu.');
       return;
     }
-  
+
     try {
       const response = await axios.post(`${BE_URL}/login`, {
         email: email,
         password: password
       });
-  
+
       if (response.status === 201 && response.data.token) {
         await AsyncStorage.setItem('userToken', response.data.token);
+        await AsyncStorage.setItem('refreshToken', response.data.refresh_token);
         Alert.alert('Thành công', 'Đăng nhập thành công!');
         // Điều hướng tới màn hình chính hoặc dashboard
         navigation.replace('MainApp'); // sửa theo tên màn hình bạn muốn
@@ -55,56 +56,58 @@ const InputLoginScreen = () => {
       }
     }
   };
-  
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <IconI name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.title}>Xin Chào 👋</Text>
-      <Text style={styles.subtitle}>
-        Vui Lòng Nhập Email và Mật Khẩu Của Bạn
-      </Text>
-
-
-      <Text style={styles.label}>Địa Chỉ Email: </Text>
-      <View style={styles.input}>
-        <TextInput
-          style={{ flex: 1 }}
-          placeholder="Địa Chỉ Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
-        <IconI name="mail-outline" size={22} color="#000" />
-      </View>
-      <Text style={styles.label}>Mật Khẩu: </Text>
-      <View style={styles.input}>
-        <TextInput
-          style={{ flex: 1 }}
-          placeholder="Mật Khẩu"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <IconI
-            name={showPassword ? "eye-off-outline" : "eye-outline"}
-            size={22}
-            color="#000"
-          />
-        </TouchableOpacity>
-      </View>
-
-
-      <Text style={styles.loginText}>
-        Chưa có tài khoản?{" "}
-        <Text style={styles.link} onPress={() => navigation.navigate("SignUpScreen")}>
-          Đăng Ký
+    <View style={{ flex: 1, backgroundColor: '#fff', paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20}}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <IconI name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.title}>Xin Chào 👋</Text>
+        <Text style={styles.subtitle}>
+          Vui Lòng Nhập Email và Mật Khẩu Của Bạn
         </Text>
-      </Text>
+
+
+        <Text style={styles.label}>Địa Chỉ Email: </Text>
+        <View style={styles.input}>
+          <TextInput
+            style={{ flex: 1 }}
+            placeholder="Địa Chỉ Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
+          <IconI name="mail-outline" size={22} color="#000" />
+        </View>
+        <Text style={styles.label}>Mật Khẩu: </Text>
+        <View style={styles.input}>
+          <TextInput
+            style={{ flex: 1 }}
+            placeholder="Mật Khẩu"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <IconI
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={22}
+              color="#000"
+            />
+          </TouchableOpacity>
+        </View>
+
+
+        <Text style={styles.loginText}>
+          Chưa có tài khoản?{" "}
+          <Text style={styles.link} onPress={() => navigation.navigate("SignUpScreen")}>
+            Đăng Ký
+          </Text>
+        </Text>
+
+      </ScrollView>
       <TouchableOpacity onPress={handleLogin} style={styles.shadow}>
         <LinearGradient
           colors={['#7E92F8', '#6972F0']}
@@ -119,9 +122,7 @@ const InputLoginScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
+    
     flex: 1,
   },
   header: {

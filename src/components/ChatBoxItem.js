@@ -20,15 +20,18 @@ import axios from 'axios';
 import * as Speech from 'expo-speech';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BE_URL, getToken } from '../allScreens/api/config';
+import API from '../allScreens/api/axiosInstance';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
+const ChatBox = ({ openDrawer, headerTitle, onVoicePress, }) => {
   const route = useRoute();
   const navigation = useNavigation();
   const { chatId } = route.params;
+
   const [chatNewId, setChatNewId] = useState(null);
 
   const [messages, setMessages] = useState([]);
+  const [endChat, setEndChat] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [aiAnswer, setAIAnswer] = useState(false);
@@ -54,30 +57,21 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
   //   setMessages([greeting]);
   // }, []);
 
-
   const getChatContent = async (chatId) => {
-    const token = await getToken();
     try {
       setLoading(true);
 
       const [questionsRes, answersRes] = await Promise.all([
-        axios.get(`${BE_URL}/questions/${chatId}`, {
-          headers: {
-            Authorization: token,
-          },
-        }),
-        axios.get(`${BE_URL}/answers/${chatId}`, {
-          headers: {
-            Authorization: token,
-          },
-        }),
+        API.get(`/questions/${chatId}`),
+
+        API.get(`/answers/${chatId}`),
       ]);
 
       const combined = combineMessages(questionsRes.data, answersRes.data);
 
       setMessages(combined);
     } catch (err) {
-      // console.error("Error fetching questions or answers:", err.response?.data || err.message);
+      console.error("Error fetching questions or answers:", err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -110,6 +104,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
 
   // Gọi khi màn hình load
   useEffect(() => {
+
     if (chatId) getChatContent(chatId);
   }, [chatId]);
 
@@ -130,7 +125,6 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
     setAISpeaking(false);
   };
   const sendMessage = async () => {
-    const token = await getToken();
     if (!inputText.trim()) return;
     setIsInputEmpty(true)
     const userMessage = {
@@ -145,16 +139,10 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
     setAIAnswer(true);
     setError(false)
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': token,
-    };
+    console.log("mess", "old " + chatId);
+
     try {
-      const response = await axios.post(`${BE_URL}/questions/${chatId}`, {
-        content: inputText.trim(),
-      }, {
-        headers: headers,
-      });
+      const response = await API.post(`/questions/${chatId}`, { content: inputText.trim() });
 
       // Xử lý phản hồi từ API
       const aiMessage = {
@@ -162,6 +150,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
         text: response.data.content,
         isSender: false,
       };
+      setEndChat(response.data.end)
       setMessages(prev => [...prev, aiMessage]);
       setAIAnswer(false);
     } catch (error) {
@@ -172,7 +161,6 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
   };
 
   const sendNewMessage = async () => {
-    const token = await getToken();
     if (!inputText.trim()) return;
 
     setIsInputEmpty(true);
@@ -187,16 +175,10 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
     setInputText('');
     setAIAnswer(true);
     setError(false);
-
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': token,
-    };
-
     try {
       let currentChatId = chatNewId;
       if (!currentChatId) {
-        const responseNew = await axios.post(`${BE_URL}/chats`, {}, { headers });
+        const responseNew = await API.post(`/chats`, {});
         if (responseNew.status === 201 && responseNew.data.new_chat_id) {
           currentChatId = responseNew.data.new_chat_id;
           setChatNewId(currentChatId);
@@ -211,11 +193,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
       // Gửi câu hỏi tới chat hiện tại
       console.log("mess", "new " + currentChatId);
 
-      const response = await axios.post(
-        `${BE_URL}/questions/${currentChatId}`,
-        { content: userMessage.text },
-        { headers }
-      );
+      const response = await API.post(`/questions/${currentChatId}`, { content: userMessage.text });
 
       const aiMessage = {
         id: (Date.now() + 1).toString(),
@@ -366,7 +344,7 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
             <Text style={styles.headerTitle}>{headerTitle ? headerTitle : "New Chat"}</Text>
           </View>
           {/* maxHeight: "100%", marginBottom: aiAnswer ? "23%" : 36, */}
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, marginBottom: aiAnswer ? 0 : -15, }}>
             <FlatList
               ref={flatListRef}
               data={messages}
@@ -376,8 +354,8 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
             />
             {/* Loading */}
             {aiAnswer && (
-              <View style={{ width: 80, height: 40, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100 }}>
-                <DotIndicator color='#000' size={8} count={3} />
+              <View style={{ width: 60, height: 30, backgroundColor: "#f1f1f1", alignItems: 'center', borderRadius: 100, position: 'absolute', bottom: 0 }}>
+                <DotIndicator color='#000' size={7} count={3} />
               </View>
             )}
             {/* Error */}
@@ -388,47 +366,52 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
             )}
           </View>
         </View>
+        {endChat ?
+          (<View>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={isFocused ? styles.inputFocused : styles.input}
-            placeholder="Nhập tin nhắn..."
-            value={inputText}
-            onChangeText={(text) => {
-              setInputText(text);
-              setIsInputEmpty(text.trim().length === 0);
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            ref={searchInputRef}
-          />
+          </View>) :
 
-          {aiAnswer ? (
-            <TouchableOpacity onPress={stopAI}>
-              <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
-                <View style={styles.innerStopButton}>
-                  <Image source={require('../assets/stop.png')} style={{ width: 18, height: 18 }} />
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          ) : (
-            isInputEmpty ? (
-              <TouchableOpacity style={styles.sendButton} onPress={onVoicePress}>
-                <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                  <Icon name="barcode-outline" size={23} color={'#fff'} />
+          (<View style={styles.inputContainer}>
+            <TextInput
+              style={isFocused ? styles.inputFocused : styles.input}
+              placeholder="Nhập tin nhắn..."
+              value={inputText}
+              onChangeText={(text) => {
+                setInputText(text);
+                setIsInputEmpty(text.trim().length === 0);
+              }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              ref={searchInputRef}
+            />
+
+            {aiAnswer ? (
+              <TouchableOpacity onPress={stopAI}>
+                <LinearGradient colors={['#FED29F', '#FFA83F']} style={styles.stopButton}>
+                  <View style={styles.innerStopButton}>
+                    <Image source={require('../assets/stop.png')} style={{ width: 18, height: 18 }} />
+                  </View>
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.sendButton} onPress={chatId ? sendMessage : sendNewMessage}>
-                <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
-                  <Image source={require('../assets/send.png')} style={{ width: 18, height: 18 }} />
-                </LinearGradient>
-              </TouchableOpacity>
-            )
-          )}
-        </View>
+              isInputEmpty ? (
+                <TouchableOpacity style={styles.sendButton} onPress={onVoicePress}>
+                  <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
+                    <Icon name="barcode-outline" size={23} color={'#fff'} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.sendButton} onPress={chatId ? sendMessage : sendNewMessage}>
+                  <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
+                    <Image source={require('../assets/send.png')} style={{ width: 18, height: 18 }} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              )
+            )}
+          </View>)}
 
-      </View>
+
+      </View >
       {showCopyModal && (
         <BlurView intensity={50} tint="light" style={styles.blurOverlay}>
           <TouchableOpacity
@@ -448,7 +431,8 @@ const ChatBox = ({ openDrawer, headerTitle, onVoicePress }) => {
             </TouchableOpacity>
           </View>
         </BlurView>
-      )}
+      )
+      }
 
     </>
   );
@@ -527,7 +511,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 20,
     marginVertical: 5,
-    maxWidth: '85%',
+    maxWidth: '80%',
 
   },
   sender: {

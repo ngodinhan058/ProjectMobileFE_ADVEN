@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, Image, Mo
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileSrceen = () => {
   const navigation = useNavigation();
@@ -13,9 +14,11 @@ const ProfileSrceen = () => {
     handleInputChange('userGender', value);
     setModalVisible(false);
   };
-  const handleLogout = () => {
+  const handleLogout = async () => {
     console.log("Logout");
     setModalVisible(false);
+    await AsyncStorage.removeItem('userToken');
+    navigation.replace('LoginScreen');
   };
   return (
     <>

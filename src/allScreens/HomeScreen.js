@@ -1,11 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, Alert, Image, StyleSheet, TouchableOpacity, } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, Alert, Image, StyleSheet, TouchableOpacity, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const backPressCount = useRef(0);
+  const timeoutRef = useRef(null);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const handleBackPress = () => {
+        if (backPressCount.current === 0) {
+          backPressCount.current += 1;
+          ToastAndroid.show('Nhấn thêm lần nữa để thoát ứng dụng', ToastAndroid.SHORT);
+
+          timeoutRef.current = setTimeout(() => {
+            backPressCount.current = 0;
+          }, 2000);
+
+          return true;
+        } else {
+          BackHandler.exitApp();
+          return true;
+        }
+      };
+
+      if (Platform.OS === 'android') {
+        BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      }
+
+      return () => {
+        if (Platform.OS === 'android') {
+          BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        }
+      };
+    }, [])
+  );
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await getToken();
+      if (token) {
+        navigation.replace('LoginScreen');
+      }
+    };
+
+    checkToken();
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -21,7 +65,7 @@ const HomeScreen = () => {
         <Text style={styles.description}>
           Bắt đầu trò chuyện với AI ngay bây giờ. {"\n"}Bạn có thể hỏi tôi bất cứ điều gì.
         </Text>
-        <TouchableOpacity onPress={() =>  navigation.navigate(`ChatScreen`, { chatId: null })} style={styles.shadow}>
+        <TouchableOpacity onPress={() => navigation.navigate(`ChatScreen`, { chatId: null })} style={styles.shadow}>
           <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.gradientButton}>
             <Text style={styles.buttonText}>Bắt Đầu Trò Chuyện</Text>
           </LinearGradient>
