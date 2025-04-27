@@ -20,10 +20,11 @@ Lưu ý: cả 2 máy phải kết nối 1 mạng
 1.  khởi động BE. '127.0.0.1:5000'
 2.  vào web https://ngrok.com/ tạo 1 tài khoản.
 3.  sau khi tạo xong thì vào https://dashboard.ngrok.com/get-started/setup/windows tải file ngrok về
-  ![image](https://github.com/user-attachments/assets/10874efb-5775-4da3-9d57-003c57d9f62b)
+  
    ![image](https://github.com/user-attachments/assets/b2d6b034-3b85-496a-a4d1-e75c55597830)
 
-5.  giải nén ra, vào terminal của ngrok. 
+5.  giải nén ra, vào terminal của ngrok.
+   ![image](https://github.com/user-attachments/assets/10874efb-5775-4da3-9d57-003c57d9f62b)
 ![image](https://github.com/user-attachments/assets/be812fa0-94bd-4953-8c4c-c6ec17400cc6)
 6.  copy token vào terminal
 ![image](https://github.com/user-attachments/assets/747185a0-3b85-4608-b4b5-ef6af3021399)
@@ -34,7 +35,7 @@ Lưu ý: cả 2 máy phải kết nối 1 mạng
 copy 'https://0334-2405-4802-8151-df90-6df0-2c0b-5b71-b4eb.ngrok-free.app' bỏ vào 'BE_URL' ở config.js
 ![image](https://github.com/user-attachments/assets/2bad3a56-033d-4bdf-aa28-07eee3095091)
 
-Lưu ý: Mỗi khi tắt cmd đều phải làm lại từ bước số 7. Nó ko phải mặc định 1 link
+Lưu ý: Mỗi khi tắt cmd đều phải làm lại từ bước số 8. Vì nó không phải mặc định 1 link
  
 
 *** Thư viện ngoài hỗ trợ: ffmpeg (ép buộc phải có để có thể sử dụng VoiceScreen) ***
