@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BE_URL, getToken } from './src/allScreens/api/config';
+import API from './src/allScreens/api/axiosInstance';
 
 import Toast from 'react-native-toast-message';
 import { StatusBar } from 'react-native';
@@ -17,6 +17,7 @@ import ChatScreen from './src/allScreens/ChatScreen';
 import ProfileScreen from './src/allScreens/ProfileScreen';
 import BioScreen from './src/allScreens/BioScreen';
 import VoiceScreen from './src/allScreens/VoiceScreen';
+import SummaryScreen from './src/allScreens/SummaryScreen';
 
 // All Login Screen
 import LoginScreen from './src/allScreens/screens/login/LoginScreen';
@@ -35,11 +36,11 @@ const Stack = createStackNavigator();
 
 
 function CustomDrawerContent(props) {
-  const { chats } = props;
+  const { chats, refreshChats } = props;
+  const [userData, setUserData] = useState(null);
 
   const navigation = useNavigation();
   const animatedValues = useRef({}).current;
-
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteVisible, setDeleteVisible] = useState(null);
   // const currentRoute = chats[0].id;
@@ -53,12 +54,29 @@ function CustomDrawerContent(props) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const handleDelete = () => {
-    // xử lý xoá ở đây
-    console.log('Confirmed delete!');
+  const handleDelete = async (chatId) => {
     setIsModalVisible(false);
-  };
 
+    try {
+      const res = await API.delete(`/chats/${chatId}`);
+      Alert.alert('Thành công', 'Xóa chat thành công!');
+      await refreshChats();
+      return res.data;
+    } catch (error) {
+      console.error('Delete error:', error);
+      Alert.alert('Lỗi', error.detail || error.message || 'Xóa chat thất bại');
+      throw error.response?.data || { message: 'Unknown error deleting chat' };
+    }
+  };
+  const deleteAllChats = async () => {
+    try {
+      const res = await API.delete('/chats');
+      Alert.alert('Thành công', 'Xóa tất cả đoạn chat thành công!');
+      return res.data; // { content: 'All chats deleted successfully for the user' }
+    } catch (error) {
+      throw error.response?.data || { message: 'Unknown error deleting all chats' };
+    }
+  };
   useEffect(() => {
     Object.entries(animatedValues).forEach(([id, anim]) => {
       Animated.timing(anim, {
@@ -68,6 +86,92 @@ function CustomDrawerContent(props) {
       }).start();
     });
   }, [deleteVisible]);
+
+
+
+  // useEffect(() => {
+  //   let isMounted = true; // Thêm flag để tránh leak khi component unmount
+
+  //   const getUser = async () => {
+  //     try {
+  //       const token = await AsyncStorage.getItem('userToken');
+
+  //       if (!token) {
+  //         console.log('Token is missing, navigating to LoginScreen...');
+  //         if (isMounted) {
+  //           setUserData(null);
+  //           navigation.replace('LoginScreen');
+  //         }
+  //         return;
+  //       }
+
+  //       // Gửi API với token, đảm bảo header đúng
+  //       const response = await API.get(`/users`);
+
+  //       if (isMounted) {
+  //         setUserData(response.data);
+  //         console.log('User data loaded:', response.data);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching user data:', error);
+
+  //       if (isMounted) {
+  //         setUserData(null);
+
+  //         // Nếu token invalid
+  //         if (error.response && error.response.data.message === 'token is invalid') {
+  //           console.log('Token is invalid. Removing token and navigating to LoginScreen...');
+  //           await AsyncStorage.removeItem('userToken');
+  //           await AsyncStorage.removeItem('refreshToken');
+  //           navigation.replace('LoginScreen');
+  //         }
+  //       }
+  //     }
+  //   };
+
+  //   getUser();
+
+  //   // Cleanup khi component unmount
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, []);
+
+
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await API.get(`/users`);
+        setUserData(response.data);
+        console.log('User data loaded:', response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('refreshToken');
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      getUser();
+    }, 2000); // delay 2s
+
+    return () => clearTimeout(timeoutId); // cleanup if component unmounts
+  }, []);
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await API.get(`/users`);
+        setUserData(response.data);
+        console.log('User data loaded:', response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    getUser();
+  }, []);
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
@@ -126,7 +230,7 @@ function CustomDrawerContent(props) {
                         if (isDeleteMode) {
                           setDeleteVisible(null);
                         } else {
-                          props.navigation.navigate(`Chat_${screen.id}`, { title: screen.name, chatId: screen.id });
+                          props.navigation.navigate(`Chat_${screen.id}`, { title: screen.name, chatId: screen.id, status: screen.status });
                           setSearchQuery('');
                           setDeleteVisible(null);
                         }
@@ -173,9 +277,10 @@ function CustomDrawerContent(props) {
                           onPress={() => {
                             setDeleteVisible(null);
                             setIsModalVisible(true);
+                            handleDelete(screen.id)
                           }}
                         >
-                          <Ionicons name="trash-outline" size={18} color="white" />
+                          <Ionicons name="trash-outline" size={21} color="white" />
                         </TouchableOpacity>
                       </View>
                     )}
@@ -202,18 +307,19 @@ function CustomDrawerContent(props) {
           style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
         >
           <Image
-            source={require('./src/assets/logo.png')}
+            source={{ uri: userData ? `${BE_URL}/${userData.avatar}` : "" }}
             style={{ width: 50, height: 50, marginHorizontal: 8 }}
             resizeMode="contain"
           />
-          <Text style={{ fontSize: 16, fontWeight: '500' }}>Full Name</Text>
+
+          <Text style={{ fontSize: 16, fontWeight: '500' }}>{userData ? userData.name : ""}</Text>
         </TouchableOpacity>
       </View>
-      <ModalComponent
+      {/* <ModalComponent
         visible={isModalVisible}
-        onConfirm={handleDelete}
+        onConfirm={handleDelete()}
         onCancel={() => setIsModalVisible(false)}
-      />
+      /> */}
     </DrawerContentScrollView>
   );
 }
@@ -225,13 +331,10 @@ function SidebarNavigator() {
 
   const getChats = async () => {
     const token = await getToken();
+    console.log(token);
 
     try {
-      const response = await axios.get(`${BE_URL}/chats`, {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response = await API.get(`/chats`);
       setChats(response.data);
 
     } catch (err) {
@@ -255,7 +358,7 @@ function SidebarNavigator() {
       <Drawer.Navigator
         initialRouteName="AllHomeScreen"
         screenOptions={{ headerShown: false }}
-        drawerContent={props => <CustomDrawerContent {...props} chats={chats} />}
+        drawerContent={props => <CustomDrawerContent {...props} chats={chats} refreshChats={getChats} />}
       >
         <Drawer.Screen
           name={"AllHomeScreen"}
@@ -265,7 +368,7 @@ function SidebarNavigator() {
           <Drawer.Screen
             key={chat.id}
             name={`Chat_${chat.id}`}
-            children={() => <ChatScreen title={chat.name} chatId={chat.id} />}
+            children={() => <ChatScreen title={chat.name} chatId={chat.id} status={chat.status} />}
           />
         ))}
 
@@ -279,6 +382,7 @@ function AllHomeScreen() {
     <Stack.Navigator screenOptions={{ headerShown: false, }}>
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+
     </Stack.Navigator>
   );
 }
@@ -302,6 +406,7 @@ export default function App() {
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="InputLoginScreen" component={InputLoginScreen} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+          <Stack.Screen name="SummaryScreen" component={SummaryScreen} />
         </Stack.Navigator>
         {/* <AllLoginScreen /> */}
         <Toast />

@@ -1,9 +1,9 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import React, { useEffect, useRef,  } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, BackHandler, ToastAndroid, Platform } from "react-native";
 import { Video } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { useFocusEffect } from '@react-navigation/native';
 // Import video từ thư mục nội bộ
 import videoBg from "../../../assets/video.mp4";  // Đường dẫn đúng vào thư mục assets
 import { useNavigation } from '@react-navigation/native';
@@ -14,8 +14,44 @@ const { width, height } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const backPressCount = useRef(0);
+  const timeoutRef = useRef(null);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const handleBackPress = () => {
+        if (backPressCount.current === 0) {
+          backPressCount.current += 1;
+          ToastAndroid.show('Nhấn thêm lần nữa để thoát ứng dụng', ToastAndroid.SHORT);
+
+          timeoutRef.current = setTimeout(() => {
+            backPressCount.current = 0;
+          }, 2000);
+
+          return true;
+        } else {
+          BackHandler.exitApp();
+          return true;
+        }
+      };
+
+      if (Platform.OS === 'android') {
+        BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      }
+
+      return () => {
+        if (Platform.OS === 'android') {
+          BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        }
+      };
+    }, [])
+  );
   return (
-    <View style={styles.container}>
+    <ImageBackground style={styles.container}
+      source={require('../../../assets/bg_voice.png')}
+      resizeMode="cover">
       {/* Video nền */}
       <Video
         source={videoBg}  // Sử dụng video từ thư mục nội bộ
@@ -49,7 +85,7 @@ const LoginScreen = () => {
         </TouchableOpacity>
 
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -91,7 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginVertical: 20,
   },
-  
+
   buttonText: {
     color: "#fff",
     fontSize: 16,
