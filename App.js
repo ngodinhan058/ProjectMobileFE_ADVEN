@@ -82,20 +82,18 @@ function CustomDrawerContent(props) {
       }).start();
     });
   }, [deleteVisible]);
-
+  const getUser = async () => {
+    try {
+      const response = await API.get(`/users`);
+      setUserData(response.data);
+      console.log('User data loaded:', response.data);
+    } catch (error) {
+      console.log('Error fetching user data:', error);
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('refreshToken');
+    }
+  };
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await API.get(`/users`);
-        setUserData(response.data);
-        console.log('User data loaded:', response.data);
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-        await AsyncStorage.removeItem('userToken');
-        await AsyncStorage.removeItem('refreshToken');
-      }
-    };
-
     const timeoutId = setTimeout(() => {
       getUser();
     }, 2000); // delay 2s
@@ -104,16 +102,6 @@ function CustomDrawerContent(props) {
   }, []);
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await API.get(`/users`);
-        setUserData(response.data);
-        console.log('User data loaded:', response.data);
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-      }
-    };
-
     getUser();
   }, []);
   const handleLogout = async () => {
@@ -184,6 +172,7 @@ function CustomDrawerContent(props) {
               onRefresh={async () => {
                 try {
                   await refreshChats(); // Gọi hàm reload lại list chats
+                  getUser();
                 } catch (error) {
                   console.log('Refresh error:', error);
                 }
@@ -294,7 +283,7 @@ function CustomDrawerContent(props) {
         >
           <Image
             source={{ uri: userData ? `${BE_URL}/${userData.avatar}` : "" }}
-            style={{ width: 50, height: 50, marginHorizontal: 8 }}
+            style={{ width: 50, height: 50, marginHorizontal: 10, borderRadius: 50 }}
             resizeMode="contain"
           />
 
@@ -382,8 +371,8 @@ export default function App() {
 
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="MainApp" component={SidebarNavigator} />
           <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
           <Stack.Screen name="BioScreen" component={BioScreen} />

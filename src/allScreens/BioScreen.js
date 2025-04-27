@@ -25,19 +25,20 @@ const BiodataScreen = ({ navigation, route }) => {
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({
     userPhone: '',
-    userBirthday: '',
     userFullName: '',
     userGender: '',
+    userPass: '',
   });
   useEffect(() => {
     const getUser = async () => {
       try {
         const response = await API.get(`/users`);
+
         setUserData(response.data);
         setFormData({
-          userFullName: response.data.name || '',
-          userPhone: response.data.phone_number || '',
-          userGender: response.data.gender || '',
+          userFullName: response?.data?.name || '',
+          userPhone: response?.data?.phone_number || '',
+          userGender: response?.data?.gender || '',
         });
         console.log('User data loaded:', response.data);
       } catch (error) {
@@ -53,27 +54,31 @@ const BiodataScreen = ({ navigation, route }) => {
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
+  const handleInputChange = (name, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
     }));
   };
-
+  
+  useEffect(() => {
+    console.log('FormData changed:', formData);
+  }, [formData]);
+  
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleSelectGender = (value) => {
     handleInputChange('userGender', value);
+    
     setModalVisible(false);
   };
   const renderGenderText = () => {
-    if (userData?.gender === 'male') {
-      return 'Nam';
-    } else if (userData?.gender === 'female') {
-      return 'Nữ';
-    }
-    return 'Chưa chọn';
+    if (formData.userGender === 'male') return 'Nam';
+    if (formData.userGender === 'female') return 'Nữ';
+    if (formData.userGender === 'other') return 'Khác';
+    return 'Chọn giới tính';
   };
+  
 
 
 
@@ -142,17 +147,13 @@ const BiodataScreen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <IconI name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Account</Text>
+            <Text style={styles.headerTitle}>Tài Khoản</Text>
           </View>
           {/* Avatar */}
 
 
           <ScrollView style={{ flex: 1, marginTop: 30, marginHorizontal: 2 }} showsVerticalScrollIndicator={false}>
             <View style={styles.avatarContainer}>
-              {/* <UploadImage
-          onImagesSelected={setSelectedImage}
-          image={selectedImage}
-        /> */}
               <TouchableOpacity onPress={handlePickAvatar}>
                 <Image
                   source={
@@ -166,14 +167,13 @@ const BiodataScreen = ({ navigation, route }) => {
                 />
               </TouchableOpacity>
 
-              {/* <Text style={styles.nameText}>{formData.username || 'Tên người dùng'}</Text> */}
             </View>
             {/* Full Name */}
             <View style={styles.input}>
               <TextInput
                 style={{ flex: 1 }}
                 placeholder="Nhập Họ Tên Của Bạn"
-                value={formData.name}
+                value={formData.userFullName}
                 onChangeText={(text) => handleInputChange('userFullName', text)}
               />
               <IconI name="person-outline" size={22} color="#000" />
@@ -185,7 +185,7 @@ const BiodataScreen = ({ navigation, route }) => {
               <TextInput
                 style={{ flex: 1 }}
                 placeholder="Nhập Số Điện Thoại Của Bạn"
-                value={formData.phone_number}
+                value={formData.userPhone}
                 onChangeText={(text) => handleInputChange('userPhone', text)}
                 keyboardType="phone-pad"
               />
@@ -196,7 +196,7 @@ const BiodataScreen = ({ navigation, route }) => {
             <Text style={styles.textTitle}>Giới Tính: </Text>
             <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
               <View style={{ paddingVertical: 10, paddingHorizontal: 2 }}>
-                <Text style={{ flex: 1, color: formData.gender ? '#000' : '#999' }}>
+                <Text style={{ flex: 1, color: formData.userGender ? '#000' : '#999' }}>
                   {renderGenderText()}
                 </Text>
               </View>
