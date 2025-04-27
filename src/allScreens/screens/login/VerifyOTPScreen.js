@@ -6,69 +6,97 @@ import { BE_URL } from '../../api/config';
 
 const VerifyOTPScreen = ({ route, navigation }) => {
   const { email } = route.params;
-  
-  // Log email để kiểm tra
-  console.log('Email:', email);
 
   const [otp, setOtp] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleResetPassword = async () => {
-    if (!otp || !newPassword) {
-      Alert.alert('Error', 'Please enter OTP and new password');
+    if (!otp || !newPassword || !confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
       return;
     }
-  
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      console.log('Sending OTP:', otp); // Debug log
-      console.log('Sending new password:', newPassword); // Debug log
       const response = await axios.post(`${BE_URL}/reset_password`, {
         email,
-        otp,
+        otp: Number(otp),
         new_password: newPassword,
       });
-      Alert.alert('Success', response.data.message);
-      navigation.navigate('Login');  // Navigate back to login after password reset
+      Alert.alert('Thành công', response.data.message);
+      navigation.navigate('LoginScreen');
     } catch (error) {
-      setIsLoading(false);
+      // console.error('Lỗi reset mật khẩu:', error.response?.data || error.message);
       if (error.response && error.response.data) {
-        console.log('Error response:', error.response.data);  // Debug log
-        Alert.alert('Error', error.response.data.message);
+        Alert.alert('Lỗi', "Sai Mã OTP");
       } else {
-        Alert.alert('Error', 'An error occurred while resetting password');
+        Alert.alert('Lỗi', 'Có lỗi xảy ra khi đặt lại mật khẩu');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
-  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Verify OTP</Text>
+      <Text style={styles.title}>Xác Thực OTP</Text>
+
       <TextInput
         style={styles.input}
-        placeholder="Enter OTP"
+        placeholder="Nhập mã OTP"
         value={otp}
         onChangeText={setOtp}
         keyboardType="numeric"
       />
+
       <TextInput
         style={styles.input}
-        placeholder="Enter New Password"
+        placeholder="Nhập mật khẩu mới"
         value={newPassword}
         onChangeText={setNewPassword}
         secureTextEntry
       />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Xác nhận mật khẩu mới"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+      />
+
       <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={isLoading}>
-        <Text style={styles.buttonText}>Reset Password</Text>
+        <Text style={styles.buttonText}>Đặt lại mật khẩu</Text>
       </TouchableOpacity>
-      {isLoading && <ActivityIndicator size="large" color="#0000ff" />}
+
+      {isLoading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)', // màu đen mờ 40%
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100, // đảm bảo nằm trên hết
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

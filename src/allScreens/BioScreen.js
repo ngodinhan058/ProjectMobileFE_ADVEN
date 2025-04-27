@@ -19,62 +19,125 @@ import IconI from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import API from './api/axiosInstance';
 import { BE_URL } from './api/config';
+import * as ImagePicker from 'expo-image-picker'; // thêm dòng này nha
 
 const BiodataScreen = ({ navigation, route }) => {
   const [userData, setUserData] = useState(null);
+  const [formData, setFormData] = useState({
+    userPhone: '',
+    userFullName: '',
+    userGender: '',
+    userPass: '',
+  });
   useEffect(() => {
     const getUser = async () => {
       try {
         const response = await API.get(`/users`);
+
         setUserData(response.data);
+        setFormData({
+          userFullName: response?.data?.name || '',
+          userPhone: response?.data?.phone_number || '',
+          userGender: response?.data?.gender || '',
+        });
         console.log('User data loaded:', response.data);
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.log('Error fetching user data:', error);
         await AsyncStorage.removeItem('userToken');
         await AsyncStorage.removeItem('refreshToken');
       }
     };
-      getUser();
+    getUser();
   }, []);
-  const [formData, setFormData] = useState({
-    userPhone: '',
-    userBirthday: '',
-    userFullName: '',
-    userGender: '',
-  });
+
 
   const [avatar, setAvatar] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
+  const handleInputChange = (name, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
     }));
   };
-  const onDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || userBirthday;
-    setShowDatePicker(false);
-    handleInputChange('userBirthday', currentDate);
-  };
-
-  const hasPermission = (role) =>
-    userData?.roles.filter((r) => r.roleName === role);
+  
+  useEffect(() => {
+    console.log('FormData changed:', formData);
+  }, [formData]);
+  
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleSelectGender = (value) => {
     handleInputChange('userGender', value);
+    
     setModalVisible(false);
   };
   const renderGenderText = () => {
-    if (userData?.gender === 'male') {
-      return 'Nam';
-    } else if (userData?.gender === 'female') {
-      return 'Nữ';
-    }
-    return 'Chưa chọn'; // Default text if gender is not set
+    if (formData.userGender === 'male') return 'Nam';
+    if (formData.userGender === 'female') return 'Nữ';
+    if (formData.userGender === 'other') return 'Khác';
+    return 'Chọn giới tính';
   };
+  
+
+
+
+  // Thêm hàm chọn ảnh
+  const handlePickAvatar = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert("Bạn cần cấp quyền truy cập thư viện ảnh để chọn avatar.");
+      return;
+    }
+
+    let pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!pickerResult.cancelled) {
+      setAvatar(pickerResult.assets[0]); // ảnh mới chọn
+    }
+  };
+
+  // Hàm lưu thông tin
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // Gửi form thông tin user
+      await API.put('/users', {
+        name: formData.userFullName || userData?.name,
+        phone_number: formData.userPhone || userData?.phone_number,
+        gender: formData.userGender || userData?.gender,
+      });
+
+      // Nếu có chọn avatar mới
+      if (avatar) {
+        const formDataAvatar = new FormData();
+        formDataAvatar.append('file', {
+          uri: avatar.uri,
+          type: 'image/jpeg',
+          name: 'avatar.jpg',
+        });
+
+        await API.put('/avatars', formDataAvatar, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      }
+
+      Alert.alert('Thành công', 'Thông tin đã được cập nhật!');
+      navigation.goBack();
+    } catch (error) {
+      console.log('Lỗi update:', error.response?.data || error.message);
+      Alert.alert('Lỗi', 'Không thể cập nhật thông tin');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -84,34 +147,33 @@ const BiodataScreen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <IconI name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Account</Text>
+            <Text style={styles.headerTitle}>Tài Khoản</Text>
           </View>
           {/* Avatar */}
 
 
           <ScrollView style={{ flex: 1, marginTop: 30, marginHorizontal: 2 }} showsVerticalScrollIndicator={false}>
             <View style={styles.avatarContainer}>
-              {/* <UploadImage
-          onImagesSelected={setSelectedImage}
-          image={selectedImage}
-        /> */}
-          <Image
-            source={
-              userData?.avatar
-                ? { uri: `${BE_URL}/${userData.avatar}` }
-                : require("../assets/logo.png")
-            }
-            style={styles.avatar}
-          />
+              <TouchableOpacity onPress={handlePickAvatar}>
+                <Image
+                  source={
+                    avatar
+                      ? { uri: avatar.uri }
+                      : userData?.avatar
+                        ? { uri: `${BE_URL}/${userData.avatar}` }
+                        : require("../assets/image.png")
+                  }
+                  style={styles.avatar}
+                />
+              </TouchableOpacity>
 
-              {/* <Text style={styles.nameText}>{formData.username || 'Tên người dùng'}</Text> */}
             </View>
             {/* Full Name */}
             <View style={styles.input}>
               <TextInput
                 style={{ flex: 1 }}
                 placeholder="Nhập Họ Tên Của Bạn"
-                value={userData?.name}
+                value={formData.userFullName}
                 onChangeText={(text) => handleInputChange('userFullName', text)}
               />
               <IconI name="person-outline" size={22} color="#000" />
@@ -123,7 +185,7 @@ const BiodataScreen = ({ navigation, route }) => {
               <TextInput
                 style={{ flex: 1 }}
                 placeholder="Nhập Số Điện Thoại Của Bạn"
-                value={userData?.phone_number}
+                value={formData.userPhone}
                 onChangeText={(text) => handleInputChange('userPhone', text)}
                 keyboardType="phone-pad"
               />
@@ -134,7 +196,7 @@ const BiodataScreen = ({ navigation, route }) => {
             <Text style={styles.textTitle}>Giới Tính: </Text>
             <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
               <View style={{ paddingVertical: 10, paddingHorizontal: 2 }}>
-                <Text style={{ flex: 1, color: userData?.gender ? '#000' : '#999' }}>
+                <Text style={{ flex: 1, color: formData.userGender ? '#000' : '#999' }}>
                   {renderGenderText()}
                 </Text>
               </View>
@@ -144,7 +206,7 @@ const BiodataScreen = ({ navigation, route }) => {
           </ScrollView>
 
           {/* Update Button */}
-          <TouchableOpacity onPress={'save'} style={styles.shadow}>
+          <TouchableOpacity onPress={handleSave} style={styles.shadow}>
             <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.gradientButton}>
               <Text style={styles.buttonText}>Sửa Thông Tin Của Bạn</Text>
             </LinearGradient>

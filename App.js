@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import { View, Text, TextInput, Image, Animated, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard, Alert, RefreshControl } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -68,18 +68,9 @@ function CustomDrawerContent(props) {
       await refreshChats();
       return res.data;
     } catch (error) {
-      console.error('Delete error:', error);
+      console.log('Delete error:', error);
       Alert.alert('Lỗi', error.detail || error.message || 'Xóa chat thất bại');
       throw error.response?.data || { message: 'Unknown error deleting chat' };
-    }
-  };
-  const deleteAllChats = async () => {
-    try {
-      const res = await API.delete('/chats');
-      Alert.alert('Thành công', 'Xóa tất cả đoạn chat thành công!');
-      return res.data; // { content: 'All chats deleted successfully for the user' }
-    } catch (error) {
-      throw error.response?.data || { message: 'Unknown error deleting all chats' };
     }
   };
   useEffect(() => {
@@ -91,21 +82,18 @@ function CustomDrawerContent(props) {
       }).start();
     });
   }, [deleteVisible]);
-
-
+  const getUser = async () => {
+    try {
+      const response = await API.get(`/users`);
+      setUserData(response.data);
+      console.log('User data loaded:', response.data);
+    } catch (error) {
+      console.log('Error fetching user data:', error);
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('refreshToken');
+    }
+  };
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await API.get(`/users`);
-        setUserData(response.data);
-        console.log('User data loaded:', response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        await AsyncStorage.removeItem('userToken');
-        await AsyncStorage.removeItem('refreshToken');
-      }
-    };
-
     const timeoutId = setTimeout(() => {
       getUser();
     }, 2000); // delay 2s
@@ -114,19 +102,34 @@ function CustomDrawerContent(props) {
   }, []);
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await API.get(`/users`);
-        setUserData(response.data);
-        console.log('User data loaded:', response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
     getUser();
   }, []);
-
+  const handleLogout = async () => {
+    try {
+      Alert.alert(
+        'Xác nhận đăng xuất',
+        'Bạn muốn đăng xuất phải không?',
+        [
+          {
+            text: 'Huỷ',
+            style: 'cancel',
+          },
+          {
+            text: 'Đăng Xuất',
+            onPress: async () => {
+              await AsyncStorage.removeItem('userToken');
+              await AsyncStorage.removeItem('refreshToken');
+              Alert.alert('Thành công', 'Đăng xuất thành công!');
+              navigation.replace('LoginScreen');
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (error) {
+      Alert.alert('Thất bại', error);
+    }
+  };
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
@@ -161,7 +164,23 @@ function CustomDrawerContent(props) {
         </View>
 
         {/* Drawer items list scrolls naturally */}
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={false} // hoặc state `refreshing`
+              onRefresh={async () => {
+                try {
+                  await refreshChats(); // Gọi hàm reload lại list chats
+                  getUser();
+                } catch (error) {
+                  console.log('Refresh error:', error);
+                }
+              }}
+              colors={['#2b3356']} // màu khi đang loading (Android)
+              tintColor="#2b3356"    // màu vòng quay (iOS)
+            />
+          }>
           {filteredScreens.map((screen, index) => {
 
             const isFocused = currentChatId === screen.id;
@@ -264,18 +283,16 @@ function CustomDrawerContent(props) {
         >
           <Image
             source={{ uri: userData ? `${BE_URL}/${userData.avatar}` : "" }}
-            style={{ width: 50, height: 50, marginHorizontal: 8 }}
+            style={{ width: 50, height: 50, marginHorizontal: 10, borderRadius: 50 }}
             resizeMode="contain"
           />
 
           <Text style={{ fontSize: 16, fontWeight: '500' }}>{userData ? userData.name : ""}</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={{ paddingRight: 5 }} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={23} color="#f44" />
+        </TouchableOpacity>
       </View>
-      {/* <ModalComponent
-        visible={isModalVisible}
-        onConfirm={handleDelete()}
-        onCancel={() => setIsModalVisible(false)}
-      /> */}
     </DrawerContentScrollView>
   );
 }
@@ -355,9 +372,9 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="MainApp" component={SidebarNavigator} />
           <Stack.Screen name="VoiceScreen" component={VoiceScreen} />
-          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="BioScreen" component={BioScreen} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />

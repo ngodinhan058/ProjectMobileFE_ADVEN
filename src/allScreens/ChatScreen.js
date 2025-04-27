@@ -246,7 +246,7 @@ const ChatBox = () => {
         isSender: false,
         language: response.data.language,
       };
-
+      setEndChat(response.data.status)
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -389,6 +389,9 @@ const ChatBox = () => {
               <Icon name="list-outline" size={28} color="#000" style={styles.logoIcon} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{title ? title : "New Chat"}</Text>
+            <TouchableOpacity onPress={() => getChatContent(chatId)}>
+              <Icon name="refresh-outline" size={28} color="#000" style={styles.logoIcon} />
+            </TouchableOpacity>
           </View>
           {/* maxHeight: "100%", marginBottom: aiAnswer ? "23%" : 36, */}
           <View style={{ flex: 1, marginBottom: aiAnswer ? 0 : -15, }}>

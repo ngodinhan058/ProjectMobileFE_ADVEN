@@ -12,22 +12,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 const { width, height } = Dimensions.get("window");
 const UploadAudio = ({ navigation, route }) => {
   const { chatId } = route.params;
-  const widthAnim = useRef(new Animated.Value(0)).current; // width bắt đầu từ 0
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const [recording, setRecording] = useState();
   const [text, setText] = useState('Tôi Có Thể Giúp Gì Cho Bạn');
+  const [bassProfile, setBassProfile] = useState();
   const [sound, setSound] = useState();
   const [playbackStatus, setPlaybackStatus] = useState(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
-  const bassProfile = [
-    { time: 0, intensity: 0.5 },
-    { time: 1.2, intensity: 1.0 },
-    { time: 2.5, intensity: 0.3 },
-    { time: 3.0, intensity: 0.9 },
-    { time: 5.0, intensity: 1.2 },
-    { time: 7.0, intensity: 0.6 },
-  ];
+
   const stopSound = async () => {
     if (sound) {
       await sound.stopAsync();
@@ -65,30 +58,6 @@ const UploadAudio = ({ navigation, route }) => {
     await uploadAudio(uri);
   }
 
-  // async function uploadAudio(uri) {
-  //   let formData = new FormData();
-  //   formData.append('file', {
-  //     uri,
-  //     type: 'audio/m4a', // hoặc audio/wav, tùy định dạng
-  //     name: 'recording.m4a'
-  //   });
-
-  //   const response = await fetch('https://3669-2405-4802-8151-df90-bc4c-3a83-68a1-72ac.ngrok-free.app/questions_voices/2', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzQ1NzMyODgzfQ.va-sJG2Me6UmUpFtBkwqUO5HH-59OOo9ZlFaE5xtvI0', // nếu cần token
-  //       'Content-Type': 'multipart/form-data',
-  //     },
-  //     body: formData,
-  //   });
-
-  //   const data = await response.json();
-  //   console.log('Response:', data);
-
-  //   if (data.audio_url) {
-  //     playSound('https://3669-2405-4802-8151-df90-bc4c-3a83-68a1-72ac.ngrok-free.app/' + data.audio_url);
-  //   }
-  // }
   async function uploadAudio(uri) {
     const formData = new FormData();
     formData.append('file', {
@@ -113,6 +82,7 @@ const UploadAudio = ({ navigation, route }) => {
       if (response.data.audio_url) {
         playSound(BE_URL + '/' + response.data.audio_url);
         setText(response.data.text)
+        setBassProfile(response.data.bassProfile)
       }
     } catch (error) {
       console.error('Upload failed:', error.response?.data || error.message);
@@ -138,7 +108,7 @@ const UploadAudio = ({ navigation, route }) => {
       if (closestBass) {
         Animated.sequence([
           Animated.timing(scaleAnim, {
-            toValue: 1 + closestBass.intensity * 0.5,
+            toValue: 1 + closestBass.intensity * 4.0,
             duration: 100,
             useNativeDriver: true,
           }),

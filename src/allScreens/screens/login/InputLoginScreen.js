@@ -51,7 +51,7 @@ const InputLoginScreen = () => {
       } else if (error.response?.status === 403) {
         Alert.alert('Lỗi', 'Mật khẩu không đúng!');
       } else {
-        console.error(error);
+        console.log(error);
         Alert.alert('Lỗi', 'Không thể kết nối máy chủ!');
       }
     }

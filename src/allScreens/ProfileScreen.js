@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image, Modal, RefreshControl } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -13,19 +13,19 @@ const ProfileSrceen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
+  const getUser = async () => {
+    try {
+      const response = await API.get(`/users`);
+      setUserData(response.data);
+      console.log('User data loaded:', response.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('refreshToken');
+    }
+  };
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await API.get(`/users`);
-        setUserData(response.data);
-        console.log('User data loaded:', response.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        await AsyncStorage.removeItem('userToken');
-        await AsyncStorage.removeItem('refreshToken');
-      }
-    };
-      getUser();
+    getUser();
   }, []);
 
   const handleLogout = async () => {
@@ -38,7 +38,20 @@ const ProfileSrceen = () => {
   };
   return (
     <>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} refreshControl={
+        <RefreshControl
+          refreshing={false} // hoặc state `refreshing`
+          onRefresh={async () => {
+            try {
+              getUser();
+            } catch (error) {
+              console.log('Refresh error:', error);
+            }
+          }}
+          colors={['#2b3356']} // màu khi đang loading (Android)
+          tintColor="#2b3356" 
+        />
+      }>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
@@ -48,18 +61,18 @@ const ProfileSrceen = () => {
         {/* User Info */}
         <TouchableOpacity style={styles.userInfo} activeOpacity={0.5} onPress={() => navigation.navigate('BioScreen')}>
           <View style={{ justifyContent: 'space-between', flexDirection: "row", alignItems: 'center' }}>
-          <Image
-            source={
-              userData?.avatar
-                ? { uri: `${BE_URL}/${userData.avatar}` }
-                : require("../assets/logo.png")
-            }
-            style={styles.avatar}
-          />
+            <Image
+              source={
+                userData?.avatar
+                  ? { uri: `${BE_URL}/${userData?.avatar}` }
+                  : require("../assets/logo.png")
+              }
+              style={styles.avatar}
+            />
 
             <View>
-            <Text style={styles.username}>{userData?.name || "Full Name"}</Text>
-            <Text style={styles.email}>{userData?.email || "email_example@gmail.com"}</Text>
+              <Text style={styles.username}>{userData?.name || "Full Name"}</Text>
+              <Text style={styles.email}>{userData?.email || "email_example@gmail.com"}</Text>
             </View>
           </View>
           <View style={styles.settingLeft}>
@@ -69,7 +82,7 @@ const ProfileSrceen = () => {
         {/* General Settings */}
         <Text style={styles.sectionTitle}>Tổng Quan</Text>
         <SettingItem icon="person-outline" label="Thông Tin Người Dùng" navi="BioScreen" />
-        <SettingItem icon="lock-closed-outline" label="Đổi Mật Khẩu" navi="ResetPasswordScreen"/>
+        <SettingItem icon="lock-closed-outline" label="Đổi Mật Khẩu" navi="ResetPasswordScreen" />
         <SettingItem icon="language-outline" label="Ngôn Ngữ" value="Tiếng Việt" />
 
         {/* About Section */}
