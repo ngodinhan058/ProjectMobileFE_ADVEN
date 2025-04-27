@@ -1,4 +1,4 @@
-PC:
+![image](https://github.com/user-attachments/assets/10874efb-5775-4da3-9d57-003c57d9f62b)PC:
 khi clone về. bật terminal nó lên
 Chạy "npm install" trước
 Xong chạy "npm start", đợi 1 lúc sẽ có sẽ có mã QR giống v (Hình Minh Hoạ)
@@ -16,8 +16,27 @@ thay BE_URL bằng link BE vào: (Hình Minh Hoạ)
 
 Lưu ý: cả 2 máy phải kết nối 1 mạng 
 
-Thư viện ngoài hỗ trợ: ffmpeg (ép buộc phải có để có thể sử dụng VoiceScreen) 
+*** Sử dụng NGROK để deploy BE. ***
+1.  chạy BE.
+2.  vào web https://ngrok.com/ tạo 1 tài khoản.
+3.  sau khi tạo xong thì vào https://dashboard.ngrok.com/get-started/setup/windows tải file ngrok về
+   ![image](https://github.com/user-attachments/assets/b2d6b034-3b85-496a-a4d1-e75c55597830)
 
+4.  giải nén ra, vào terminal của ngrok. 
+![image](https://github.com/user-attachments/assets/be812fa0-94bd-4953-8c4c-c6ec17400cc6)
+5.  copy token vào terminal
+![image](https://github.com/user-attachments/assets/747185a0-3b85-4608-b4b5-ef6af3021399)
+6.  thành công:![image](https://github.com/user-attachments/assets/ee5dbe64-271f-4653-93ce-6d5a9fcdeb13)
+7.  sử dụng lệnh để khởi chạy BE: ngrok http 5000
+8.  hiện như vậy ta đã deploy thành công.
+9. ![image](https://github.com/user-attachments/assets/6b184d3a-26ec-4f80-ac39-4fa2ee37abcc)
+copy 'https://0334-2405-4802-8151-df90-6df0-2c0b-5b71-b4eb.ngrok-free.app' bỏ vào 'BE_URL' ở config.js
+![image](https://github.com/user-attachments/assets/2bad3a56-033d-4bdf-aa28-07eee3095091)
+
+Lưu ý: Mỗi khi tắt cmd đều phải làm lại từ bước số 7. Nó ko phải mặc định 1 link
+ 
+
+*** Thư viện ngoài hỗ trợ: ffmpeg (ép buộc phải có để có thể sử dụng VoiceScreen) ***
 Link Download:  https://drive.google.com/file/d/13xnxlPbqDNb1C-Y0q29GIbxHDlBdZBZV/view?usp=sharing 
 
 Hướng Dẫn Sửa Dụng: 
