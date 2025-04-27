@@ -16,8 +16,8 @@ const ResetPasswordScreen = ({ navigation }) => {
 
     setIsLoading(true);
     try {
-        const response = await axios.post(`${BE_URL}/forgot_password`, { email });  // Use BE_URL
-        Alert.alert('Success', response.data.message);
+      const response = await axios.post(`${BE_URL}/forgot_password`, { email });  // Use BE_URL
+      Alert.alert('Success', response.data.message);
       navigation.navigate('VerifyOTPScreen', { email });  // Navigate to OTP verification screen
     } catch (error) {
       setIsLoading(false);
@@ -31,22 +31,37 @@ const ResetPasswordScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Reset Password</Text>
+      <Text style={styles.title}>Đặt Lại Mật Khẩu</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
+        placeholder="Nhật địa chỉ Email"
         value={email}
         onChangeText={setEmail}
       />
       <TouchableOpacity style={styles.button} onPress={handleForgotPassword} disabled={isLoading}>
-        <Text style={styles.buttonText}>Send OTP</Text>
+        <Text style={styles.buttonText}>Gửi OTP</Text>
       </TouchableOpacity>
-      {isLoading && <ActivityIndicator size="large" color="#0000ff" />}
+      {isLoading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)', // màu đen mờ 40%
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100, // đảm bảo nằm trên hết
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

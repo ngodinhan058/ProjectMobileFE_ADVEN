@@ -58,7 +58,7 @@ const SignUpScreen = ({ navigation, route }) => {
         Alert.alert('Thông báo', 'Email người dùng đã tồn tại!');
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       Alert.alert('Lỗi', 'Không thể kết nối tới máy chủ!');
     } finally {
       setLoading(false);
