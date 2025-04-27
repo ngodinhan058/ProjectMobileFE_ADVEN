@@ -16,6 +16,7 @@ import HomeScreen from './src/allScreens/HomeScreen';
 import ChatScreen from './src/allScreens/ChatScreen';
 import ProfileScreen from './src/allScreens/ProfileScreen';
 import BioScreen from './src/allScreens/BioScreen';
+import ResetPasswordScreen from './src/allScreens/ResetPasswordScreen';
 import VoiceScreen from './src/allScreens/VoiceScreen';
 import SummaryScreen from './src/allScreens/SummaryScreen';
 
@@ -23,6 +24,10 @@ import SummaryScreen from './src/allScreens/SummaryScreen';
 import LoginScreen from './src/allScreens/screens/login/LoginScreen';
 import InputLoginScreen from './src/allScreens/screens/login/InputLoginScreen';
 import SignUpScreen from './src/allScreens/screens/login/SignUpScreen';
+import ForgotPasswordScreen from './src/allScreens/screens/login/ForgotPasswordScreen';
+import VerifyOTPScreen from './src/allScreens/screens/login/VerifyOTPScreen';
+
+
 
 
 import ModalComponent from './src/components/ModalComponent';
@@ -404,8 +409,11 @@ export default function App() {
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="BioScreen" component={BioScreen} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
           <Stack.Screen name="InputLoginScreen" component={InputLoginScreen} />
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+          <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} />
+          <Stack.Screen name="VerifyOTPScreen" component={VerifyOTPScreen} />
           <Stack.Screen name="SummaryScreen" component={SummaryScreen} />
         </Stack.Navigator>
         {/* <AllLoginScreen /> */}

@@ -4,10 +4,29 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import API from './api/axiosInstance';
+import { BE_URL } from './api/config';
+
+
 
 const ProfileSrceen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await API.get(`/users`);
+        setUserData(response.data);
+        console.log('User data loaded:', response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('refreshToken');
+      }
+    };
+      getUser();
+  }, []);
 
   const handleLogout = async () => {
     console.log("Logout");
@@ -29,13 +48,18 @@ const ProfileSrceen = () => {
         {/* User Info */}
         <TouchableOpacity style={styles.userInfo} activeOpacity={0.5} onPress={() => navigation.navigate('BioScreen')}>
           <View style={{ justifyContent: 'space-between', flexDirection: "row", alignItems: 'center' }}>
-            <Image
-              source={require("../assets/logo.png")} // Bạn có thể thay ảnh avatar bằng ảnh thực tế
-              style={styles.avatar}
-            />
+          <Image
+            source={
+              userData?.avatar
+                ? { uri: `${BE_URL}/${userData.avatar}` }
+                : require("../assets/logo.png")
+            }
+            style={styles.avatar}
+          />
+
             <View>
-              <Text style={styles.username}>Full Name</Text>
-              <Text style={styles.email}>email_example@gmail.com</Text>
+            <Text style={styles.username}>{userData?.name || "Full Name"}</Text>
+            <Text style={styles.email}>{userData?.email || "email_example@gmail.com"}</Text>
             </View>
           </View>
           <View style={styles.settingLeft}>
@@ -45,7 +69,7 @@ const ProfileSrceen = () => {
         {/* General Settings */}
         <Text style={styles.sectionTitle}>Tổng Quan</Text>
         <SettingItem icon="person-outline" label="Thông Tin Người Dùng" navi="BioScreen" />
-        <SettingItem icon="lock-closed-outline" label="Đổi Mật Khẩu" />
+        <SettingItem icon="lock-closed-outline" label="Đổi Mật Khẩu" navi="ResetPasswordScreen"/>
         <SettingItem icon="language-outline" label="Ngôn Ngữ" value="Tiếng Việt" />
 
         {/* About Section */}

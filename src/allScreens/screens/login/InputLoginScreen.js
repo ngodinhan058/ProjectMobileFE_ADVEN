@@ -106,6 +106,11 @@ const InputLoginScreen = () => {
             Đăng Ký
           </Text>
         </Text>
+        <Text style={styles.loginText}>
+        <Text style={styles.link} onPress={() => navigation.navigate("ForgotPasswordScreen")}>
+          Quên Mật Khẩu
+        </Text>
+      </Text>
 
       </ScrollView>
       <TouchableOpacity onPress={handleLogin} style={styles.shadow}>

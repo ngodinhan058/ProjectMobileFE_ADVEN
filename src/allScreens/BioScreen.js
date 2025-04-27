@@ -15,14 +15,27 @@ import {
   ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import IconI from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
+import API from './api/axiosInstance';
+import { BE_URL } from './api/config';
 
 const BiodataScreen = ({ navigation, route }) => {
-  // const { userData } = route.params;
+  const [userData, setUserData] = useState(null);
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await API.get(`/users`);
+        setUserData(response.data);
+        console.log('User data loaded:', response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('refreshToken');
+      }
+    };
+      getUser();
+  }, []);
   const [formData, setFormData] = useState({
     userPhone: '',
     userBirthday: '',
@@ -32,51 +45,7 @@ const BiodataScreen = ({ navigation, route }) => {
 
   const [avatar, setAvatar] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  // const [selectedImage, setSelectedImage] = useState(userData?.userImagePath);
   const [loading, setLoading] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     try {
-  //       const userData = await AsyncStorage.getItem('userData');
-  //       if (!userData) throw new Error('No user token found');
-
-  //       const { token } = JSON.parse(userData);
-  //       const response = await fetch(`${BASE_URL}auth/users/myInfo`, {
-  //         method: 'GET',
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (response.ok) {
-  //         const userInfo = await response.json();
-  //         const userData = userInfo.data;
-
-  //         setFormData({
-  //           userPhone: userData.userPhone,
-  //           userBirthday: userData.userBirthday
-  //             ? new Date(userData.userBirthday).toISOString().slice(0, 10)
-  //             : '',
-  //           userLastName: userData.userLastName,
-  //           userFirstName: userData.userFirstName,
-  //           userAddress: userData.address
-  //             ? `${userData.address.addressName}, ${userData.address.ward}, ${userData.address.district}, ${userData.address.city}`
-  //             : 'No Address Found',
-  //         });
-
-  //         setAvatar(userData.userImagePath || null);
-  //       } else {
-  //         Alert.alert('Error', 'Failed to fetch user information');
-  //       }
-  //     } catch (error) {
-  //       console.error('Failed to fetch user info:', error);
-  //       Alert.alert('Error', 'Failed to fetch user information');
-  //     }
-  //   };
-
-  //   fetchUserInfo();
-  // }, []);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -84,68 +53,6 @@ const BiodataScreen = ({ navigation, route }) => {
       [field]: value,
     }));
   };
-
-  // const handleSave = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const userData = await AsyncStorage.getItem('userData');
-  //     if (!userData) throw new Error('No user token found');
-
-  //     const { token } = JSON.parse(userData);
-
-  //     const formDataToSend = new FormData();
-
-  //     const requestPayload = {
-  //       userPhone: formData.userPhone,
-  //       userBirthday: formData.userBirthday,
-  //       userLastName: formData.userLastName,
-  //       userFirstName: formData.userFirstName,
-  //     };
-  //     formDataToSend.append('request', JSON.stringify(requestPayload));
-
-  //     if (selectedImage) {
-  //       const fileType = selectedImage.split('.').pop();
-
-  //       const newFile = {
-  //         uri: selectedImage,
-  //         name: `user-image.${fileType}`,
-  //         type: `image/${fileType}`,
-  //       };
-  //       formDataToSend.append('image', newFile);
-  //     }
-
-  //     const response = await axios.put(
-  //       `${BASE_URL}auth/customer/myInfo`,
-  //       formDataToSend,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 200) {
-  //       Alert.alert('Success', 'Profile updated successfully!');
-  //       navigation.goBack();
-  //     } else {
-  //       console.error('Response error data:', response.data);
-  //       Alert.alert(
-  //         'Error',
-  //         `Failed to update profile. Status: ${response.status}`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error('Error:', error.message);
-  //     if (error.response) {
-  //       console.error('Response error:', error.response.data);
-  //     }
-  //     Alert.alert('Error', 'Unable to update profile due to a network error.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || userBirthday;
     setShowDatePicker(false);
@@ -161,12 +68,12 @@ const BiodataScreen = ({ navigation, route }) => {
     setModalVisible(false);
   };
   const renderGenderText = () => {
-    switch (formData.userGender) {
-      case 'male': return 'Nam';
-      case 'female': return 'Nữ';
-      case 'other': return 'Khác';
-      default: return 'Chọn Giới Tính';
+    if (userData?.gender === 'male') {
+      return 'Nam';
+    } else if (userData?.gender === 'female') {
+      return 'Nữ';
     }
+    return 'Chưa chọn'; // Default text if gender is not set
   };
   return (
     <>
@@ -188,10 +95,14 @@ const BiodataScreen = ({ navigation, route }) => {
           onImagesSelected={setSelectedImage}
           image={selectedImage}
         /> */}
-              <Image
-                source={require("../assets/logo.png")}
-                style={styles.avatar}
-              />
+          <Image
+            source={
+              userData?.avatar
+                ? { uri: `${BE_URL}/${userData.avatar}` }
+                : require("../assets/logo.png")
+            }
+            style={styles.avatar}
+          />
 
               {/* <Text style={styles.nameText}>{formData.username || 'Tên người dùng'}</Text> */}
             </View>
@@ -200,9 +111,8 @@ const BiodataScreen = ({ navigation, route }) => {
               <TextInput
                 style={{ flex: 1 }}
                 placeholder="Nhập Họ Tên Của Bạn"
-                value={formData.userFullName}
+                value={userData?.name}
                 onChangeText={(text) => handleInputChange('userFullName', text)}
-                keyboardType="phone-pad"
               />
               <IconI name="person-outline" size={22} color="#000" />
             </View>
@@ -213,7 +123,7 @@ const BiodataScreen = ({ navigation, route }) => {
               <TextInput
                 style={{ flex: 1 }}
                 placeholder="Nhập Số Điện Thoại Của Bạn"
-                value={formData.userPhone}
+                value={userData?.phone_number}
                 onChangeText={(text) => handleInputChange('userPhone', text)}
                 keyboardType="phone-pad"
               />
@@ -224,37 +134,13 @@ const BiodataScreen = ({ navigation, route }) => {
             <Text style={styles.textTitle}>Giới Tính: </Text>
             <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
               <View style={{ paddingVertical: 10, paddingHorizontal: 2 }}>
-                <Text style={{ flex: 1, color: formData.userGender ? '#000' : '#999' }}>
+                <Text style={{ flex: 1, color: userData?.gender ? '#000' : '#999' }}>
                   {renderGenderText()}
                 </Text>
               </View>
               <IconI name="chevron-down" size={22} color="#5f5f73" />
             </TouchableOpacity>
 
-            {/* Date of Birth */}
-            <Text style={styles.textTitle}>Ngày Sinh: </Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <View style={{ paddingVertical: 10, paddingHorizontal: 2 }}>
-                <Text>
-                  {formData.userBirthday
-                    ? new Date(formData?.userBirthday).toLocaleDateString('vi-VN')
-                    : 'Nhập Ngày Sinh Của Bạn'}
-                </Text>
-              </View>
-              <IconI name="calendar-outline" size={22} color="#000" />
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={new Date(formData?.userBirthday)}
-                mode="date"
-                display="default"
-                onChange={onDateChange}
-              />
-            )}
           </ScrollView>
 
           {/* Update Button */}
