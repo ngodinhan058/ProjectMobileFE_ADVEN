@@ -93,57 +93,6 @@ function CustomDrawerContent(props) {
   }, [deleteVisible]);
 
 
-
-  // useEffect(() => {
-  //   let isMounted = true; // Thêm flag để tránh leak khi component unmount
-
-  //   const getUser = async () => {
-  //     try {
-  //       const token = await AsyncStorage.getItem('userToken');
-
-  //       if (!token) {
-  //         console.log('Token is missing, navigating to LoginScreen...');
-  //         if (isMounted) {
-  //           setUserData(null);
-  //           navigation.replace('LoginScreen');
-  //         }
-  //         return;
-  //       }
-
-  //       // Gửi API với token, đảm bảo header đúng
-  //       const response = await API.get(`/users`);
-
-  //       if (isMounted) {
-  //         setUserData(response.data);
-  //         console.log('User data loaded:', response.data);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching user data:', error);
-
-  //       if (isMounted) {
-  //         setUserData(null);
-
-  //         // Nếu token invalid
-  //         if (error.response && error.response.data.message === 'token is invalid') {
-  //           console.log('Token is invalid. Removing token and navigating to LoginScreen...');
-  //           await AsyncStorage.removeItem('userToken');
-  //           await AsyncStorage.removeItem('refreshToken');
-  //           navigation.replace('LoginScreen');
-  //         }
-  //       }
-  //     }
-  //   };
-
-  //   getUser();
-
-  //   // Cleanup khi component unmount
-  //   return () => {
-  //     isMounted = false;
-  //   };
-  // }, []);
-
-
-
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -203,7 +152,9 @@ function CustomDrawerContent(props) {
           </View>
           <View>
 
-            <TouchableOpacity onPress={() => navigation.navigate(`ChatScreen`, { chatId: null })}>
+            <TouchableOpacity onPress={() => {
+              navigation.navigate('ChatScreen', { chatId: null }); // điều hướng
+            }}>
               <Ionicons name="duplicate-outline" size={25} color="#2b3356" style={{ paddingLeft: 10 }} />
             </TouchableOpacity>
           </View>

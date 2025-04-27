@@ -130,6 +130,7 @@ const ChatBox = () => {
         text: a.content,
         isSender: false, // AI
         time: new Date(a.time),
+        language: a.language,
       });
     });
 
@@ -142,16 +143,23 @@ const ChatBox = () => {
     if (chatId) getChatContent(chatId);
   }, [chatId]);
 
-  const speakText = async (text) => {
-    setAISpeaking(true);
-    const options = {
-      language: "en-EN",
-      pitch: 1.2,
-      rate: 1,
-      onDone: () => setAISpeaking(false),
-    };
+  const speakText = async (text, language) => {
+    if (language) {
+      setAISpeaking(true);
+      const options = {
+        language: language,
+        pitch: 1.2,
+        rate: 1,
+        onDone: () => setAISpeaking(false),
+      };
 
-    Speech.speak(text, options);
+      Speech.speak(text, options);
+    }
+    else {
+      console.log("language", "null");
+
+    }
+
   };
 
   const stopSpeaking = () => {
@@ -183,6 +191,7 @@ const ChatBox = () => {
         id: (Date.now() + 1).toString(),
         text: response.data.content,
         isSender: false,
+        language: response.data.language,
       };
       console.log("mess", "old " + response.data.status);
 
@@ -235,6 +244,7 @@ const ChatBox = () => {
         id: (Date.now() + 1).toString(),
         text: response.data.content,
         isSender: false,
+        language: response.data.language,
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -324,7 +334,7 @@ const ChatBox = () => {
 
                   </TouchableOpacity>) :
                   (<TouchableOpacity
-                    onPress={() => speakText(item.text)}
+                    onPress={() => speakText(item.text, item.language)}
                     style={styles.micText}
                   >
 
@@ -406,17 +416,17 @@ const ChatBox = () => {
         {endChat == "end" || status == "end" ?
           (<View style={styles.inputContainer}>
             <TouchableOpacity onPress={() => navigation.navigate('SummaryScreen', { chatId: chatId })}
-             style={{
-              borderRadius: 30,
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 1,
-              },
-              shadowOpacity: 0.27,
-              shadowRadius: 4.65,
-              elevation: 7,
-            }}>
+              style={{
+                borderRadius: 30,
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 0,
+                  height: 1,
+                },
+                shadowOpacity: 0.27,
+                shadowRadius: 4.65,
+                elevation: 7,
+              }}>
               <LinearGradient colors={['#7E92F8', '#6972F0']} style={{
                 paddingVertical: 14,
                 width: screenWidth - 40,
