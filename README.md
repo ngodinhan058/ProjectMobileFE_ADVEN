@@ -1,13 +1,17 @@
 PC:
 khi clone về. bật terminal nó lên
 Chạy "npm install" trước
-Xong chạy "npm start", đợi 1 lúc sẽ có sẽ có mã QR giống v
+Xong chạy "npm start", đợi 1 lúc sẽ có sẽ có mã QR giống v (Hình Minh Hoạ)
 ![image](https://github.com/user-attachments/assets/e70b5fb1-2524-4961-a490-e5016fa6322e)
 
 Điện Thoại:
 Trên đt lên chplay tải expo về
-xong quét mã là đc
+xong quét mã là đc (Hình Minh Hoạ)
 ![image](https://github.com/user-attachments/assets/ea4556fc-c216-44ce-afc6-d1ccf744f630)
+
+Gắn API BE: vào src/allScreens/api/config.js
+thay BE_URL bằng link BE vào: (Hình Minh Hoạ)
+![image](https://github.com/user-attachments/assets/22b1f60a-511d-4c05-a62f-5a9370307dee)
 
 
 Lưu ý: cả 2 máy phải kết nối 1 mạng 
