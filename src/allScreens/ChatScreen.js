@@ -9,6 +9,7 @@ import {
   Keyboard,
   Image,
   StyleSheet,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,13 +24,14 @@ import { BE_URL, getToken } from '../allScreens/api/config';
 import API from '../allScreens/api/axiosInstance';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { BackHandler, ToastAndroid, Platform } from 'react-native';
+const screenWidth = Dimensions.get('window').width;
 
 const ChatBox = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { chatId, title, status } = route.params;
-  console.log("status",chatId);
-  
+  // console.log("status", chatId);
+
   const backPressCount = useRef(0);
   useFocusEffect(
     React.useCallback(() => {
@@ -64,7 +66,7 @@ const ChatBox = () => {
   const [chatNewId, setChatNewId] = useState(null);
 
   const [messages, setMessages] = useState([]);
-  const [endChat, setEndChat] = useState(false);
+  const [endChat, setEndChat] = useState('');
   const [inputText, setInputText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [aiAnswer, setAIAnswer] = useState(false);
@@ -99,8 +101,7 @@ const ChatBox = () => {
 
         API.get(`/answers/${chatId}`),
       ]);
-      console.log(questionsRes.data);
-      
+
       const combined = combineMessages(questionsRes.data, answersRes.data);
 
       setMessages(combined);
@@ -141,7 +142,6 @@ const ChatBox = () => {
     if (chatId) getChatContent(chatId);
   }, [chatId]);
 
-
   const speakText = async (text) => {
     setAISpeaking(true);
     const options = {
@@ -153,10 +153,12 @@ const ChatBox = () => {
 
     Speech.speak(text, options);
   };
+
   const stopSpeaking = () => {
     Speech.stop();
     setAISpeaking(false);
   };
+
   const sendMessage = async () => {
     if (!inputText.trim()) return;
     setIsInputEmpty(true)
@@ -172,7 +174,6 @@ const ChatBox = () => {
     setAIAnswer(true);
     setError(false)
 
-    console.log("mess", "old " + chatId);
 
     try {
       const response = await API.post(`/questions/${chatId}`, { content: inputText.trim() });
@@ -183,7 +184,9 @@ const ChatBox = () => {
         text: response.data.content,
         isSender: false,
       };
-      setEndChat(response.data.end)
+      console.log("mess", "old " + response.data.status);
+
+      setEndChat(response.data.status)
       setMessages(prev => [...prev, aiMessage]);
       setAIAnswer(false);
     } catch (error) {
@@ -192,76 +195,49 @@ const ChatBox = () => {
       setAIAnswer(false);
     }
   };
-  const sendMessageNew = async (chatId) => {
-    if (!inputText.trim()) return;
-    setIsInputEmpty(true)
-    const userMessage = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      isSender: true,
-    };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInputText('');
-
-    setAIAnswer(true);
-    setError(false)
-
-    console.log("mess", "old " + chatId);
-
-    try {
-      const response = await API.post(`/questions/${chatId}`, { content: inputText.trim() });
-
-      // Xử lý phản hồi từ API
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
-        text: response.data.content,
-        isSender: false,
-      };
-      setEndChat(response.data.end)
-      setMessages(prev => [...prev, aiMessage]);
-      setAIAnswer(false);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      setError(true)
-      setAIAnswer(false);
-    }
-  };
   const sendNewMessage = async () => {
     if (!inputText.trim()) return;
-  
+
     setIsInputEmpty(true);
-  
+
     const userMessage = {
       id: Date.now().toString(),
       text: inputText.trim(),
       isSender: true,
     };
-  
+
     setMessages((prev) => [...prev, userMessage]);
     setInputText('');
     setAIAnswer(true);
     setError(false);
-  
     try {
       let currentChatId = chatNewId;
-  
-      // Nếu chưa có chat thì tạo chat mới
       if (!currentChatId) {
         const responseNew = await API.post(`/chats`, {});
         if (responseNew.status === 201 && responseNew.data.new_chat_id) {
           currentChatId = responseNew.data.new_chat_id;
           setChatNewId(currentChatId);
           navigation.setParams({ chatId: currentChatId });
-          setTimeout(() => {
-            sendMessageNew(currentChatId)
-          }, 1000); 
+
         } else {
           Alert.alert('Không thể tạo cuộc trò chuyện mới');
           setAIAnswer(false);
           return;
         }
       }
+      // Gửi câu hỏi tới chat hiện tại
+      console.log("mess", "new " + currentChatId);
+
+      const response = await API.post(`/questions/${currentChatId}`, { content: userMessage.text });
+
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        text: response.data.content,
+        isSender: false,
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       setError(true);
@@ -269,8 +245,6 @@ const ChatBox = () => {
       setAIAnswer(false);
     }
   };
-
-
 
   const stopAI = () => {
     if (timeoutRef.current) {
@@ -429,9 +403,33 @@ const ChatBox = () => {
             )}
           </View>
         </View>
-        {endChat || status == "end" ?
-          (<View>
-
+        {endChat == "end" || status == "end" ?
+          (<View style={styles.inputContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('SummaryScreen', { chatId: chatId })}
+             style={{
+              borderRadius: 30,
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 1,
+              },
+              shadowOpacity: 0.27,
+              shadowRadius: 4.65,
+              elevation: 7,
+            }}>
+              <LinearGradient colors={['#7E92F8', '#6972F0']} style={{
+                paddingVertical: 14,
+                width: screenWidth - 40,
+                borderRadius: 30,
+              }}>
+                <Text style={{
+                  color: 'white',
+                  fontSize: 16,
+                  fontWeight: '600',
+                  textAlign: 'center'
+                }}>🎯 Tổng Kết Buổi Luyện</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>) :
 
           (<View style={styles.inputContainer}>
@@ -458,7 +456,7 @@ const ChatBox = () => {
               </TouchableOpacity>
             ) : (
               isInputEmpty ? (
-                <TouchableOpacity style={styles.sendButton} onPress={() => navigation.navigate('SummaryScreen', { chatId: chatId })}>
+                <TouchableOpacity style={styles.sendButton} onPress={() => navigation.navigate('VoiceScreen', { chatId: chatId })}>
                   <LinearGradient colors={['#7E92F8', '#6972F0']} style={styles.sendButton}>
                     <Icon name="barcode-outline" size={23} color={'#fff'} />
                   </LinearGradient>

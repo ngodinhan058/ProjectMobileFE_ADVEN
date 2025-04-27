@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image, Modal } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,17 +7,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileSrceen = () => {
   const navigation = useNavigation();
-  const [darkMode, setDarkMode] = React.useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  handleLogout
-  const handleSelectGender = (value) => {
-    handleInputChange('userGender', value);
-    setModalVisible(false);
-  };
+
   const handleLogout = async () => {
     console.log("Logout");
     setModalVisible(false);
     await AsyncStorage.removeItem('userToken');
+    await AsyncStorage.removeItem('refreshToken');
+    Alert.alert('Thành công', 'Đăng xuất thành công!');
     navigation.replace('LoginScreen');
   };
   return (
@@ -27,7 +24,7 @@ const ProfileSrceen = () => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="arrow-back-outline" size={28} color="#000" style={styles.logoIcon} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Account</Text>
+          <Text style={styles.headerTitle}>Tài Khoản</Text>
         </View>
         {/* User Info */}
         <TouchableOpacity style={styles.userInfo} activeOpacity={0.5} onPress={() => navigation.navigate('BioScreen')}>
@@ -46,23 +43,16 @@ const ProfileSrceen = () => {
           </View>
         </TouchableOpacity>
         {/* General Settings */}
-        <Text style={styles.sectionTitle}>General</Text>
+        <Text style={styles.sectionTitle}>Tổng Quan</Text>
         <SettingItem icon="person-outline" label="Thông Tin Người Dùng" navi="BioScreen" />
-        <SettingItem icon="shield-checkmark-outline" label="Security" />
+        <SettingItem icon="lock-closed-outline" label="Đổi Mật Khẩu" />
         <SettingItem icon="language-outline" label="Ngôn Ngữ" value="Tiếng Việt" />
-        <View style={styles.settingItem}>
-          <View style={styles.settingLeft}>
-            <Ionicons name="eye-outline" size={20} color="#000" />
-            <Text style={styles.settingLabel}>Dark Mode</Text>
-          </View>
-          <Switch value={darkMode} onValueChange={setDarkMode} />
-        </View>
 
         {/* About Section */}
-        <Text style={styles.sectionTitle}>About</Text>
-        <SettingItem icon="help-circle-outline" label="Help Center" />
-        <SettingItem icon="lock-closed-outline" label="Privacy Policy" />
-        <SettingItem icon="information-circle-outline" label="About Speak EZ" />
+        <Text style={styles.sectionTitle}>Về</Text>
+        <SettingItem icon="help-circle-outline" label="Trung tâm trợ giúp" />
+        <SettingItem icon="shield-checkmark-outline" label="Chính sách bảo mật" />
+        <SettingItem icon="information-circle-outline" label="Giới thiệu về Speak EZ" />
 
         {/* Logout */}
         <TouchableOpacity style={styles.logout} onPress={() => setModalVisible(true)}>
@@ -98,8 +88,11 @@ const ProfileSrceen = () => {
 
 const SettingItem = ({ icon, label, value, navi }) => {
   const navigation = useNavigation();
+  const handleAlert = () => {
+    Alert.alert('Đang Phát Triển', 'Vui Lòng Chờ Đợi');
+  };
   return (
-    <TouchableOpacity style={styles.settingItem} onPress={navi ? () => navigation.navigate(navi) : ""}>
+    <TouchableOpacity style={styles.settingItem} onPress={navi ? () => navigation.navigate(navi) : () => handleAlert()}>
       <View style={styles.settingLeft}>
         <Ionicons name={icon} size={20} color="#000" />
         <Text style={styles.settingLabel}>{label}</Text>
