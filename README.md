@@ -17,7 +17,7 @@ thay BE_URL bằng link BE vào: (Hình Minh Hoạ)
 Lưu ý: cả 2 máy phải kết nối 1 mạng 
 
 *** Sử dụng NGROK để deploy BE. ***
-1.  chạy BE.
+1.  khởi động BE. '127.0.0.1:5000'
 2.  vào web https://ngrok.com/ tạo 1 tài khoản.
 3.  sau khi tạo xong thì vào https://dashboard.ngrok.com/get-started/setup/windows tải file ngrok về
    ![image](https://github.com/user-attachments/assets/b2d6b034-3b85-496a-a4d1-e75c55597830)
